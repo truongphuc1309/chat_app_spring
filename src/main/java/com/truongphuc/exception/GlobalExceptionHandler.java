@@ -6,6 +6,7 @@ import com.truongphuc.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,17 @@ public class GlobalExceptionHandler {
         ExceptionCode exceptionCode = ExceptionCode.INVALID_ARGUMENT;
         res.setCode(exceptionCode.getCode());
         res.setMessage(exception.getFieldError().getDefaultMessage());
+
+        return new ResponseEntity<>(res, exceptionCode.getHttpCode());
+    }
+
+    @ExceptionHandler (value = AuthenticationException.class)
+    public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException exception) {
+        ApiResponse<?> res = new ApiResponse<>();
+
+        ExceptionCode exceptionCode = ExceptionCode.UNAUTHORIZED;
+        res.setCode(exceptionCode.getCode());
+        res.setMessage(exception.getMessage());
 
         return new ResponseEntity<>(res, exceptionCode.getHttpCode());
     }

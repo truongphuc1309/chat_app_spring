@@ -20,6 +20,7 @@ public class LogInResponse implements Serializable{
     String email;
     String name;
     String accessToken;
+    String refreshToken;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;

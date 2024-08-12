@@ -18,6 +18,7 @@ public class AppInitializer implements WebApplicationInitializer {
         // register our config class
         ctx.register(ApplicationContextConfig.class);
         ctx.register(JpaConfig.class);
+        ctx.register(SecurityWebApplicationInitializer.class);
         ctx.register(SecurityConfig.class);
         servletContext.addListener(new ContextLoaderListener(ctx));
         // using servlet 3 api to dynamically create

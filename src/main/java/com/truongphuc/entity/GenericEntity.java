@@ -32,11 +32,11 @@ public class GenericEntity {
     String id;
 
     
-    @Column (name = "createdat")
+    @Column (name = "created_at")
     @CreationTimestamp
     LocalDateTime createdAt;
 
-    @Column (name = "updatedat")
+    @Column (name = "updated_at")
     @UpdateTimestamp
     LocalDateTime updatedAt;
 }
