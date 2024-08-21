@@ -1,2 +1,3 @@
 - forgot password
 - handle security && filter exception
+- handle duplicated single conversation

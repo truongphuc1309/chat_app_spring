@@ -1,27 +1,43 @@
 
 package com.truongphuc.entity;
 
-import java.util.Collection;
-import java.util.List;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import lombok.experimental.FieldDefaults;
+import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(callSuper = true)
 @FieldDefaults (level = AccessLevel.PRIVATE)
-@ToString
-@Entity
+@Entity(name = "user")
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "user-with-conversations",
+                attributeNodes = {
+                        @NamedAttributeNode(
+                                value = "conversations",
+                                subgraph = "conversation-with-members"
+                        )
+                },
+                subgraphs = {
+                        @NamedSubgraph(
+                                name = "conversation-with-members",
+                                attributeNodes = {
+                                        @NamedAttributeNode(value = "members"),
+                                }
+                        )
+                }
+        )
+})
 @Table (name = "user")
+
 public class UserEntity extends GenericEntity implements UserDetails{
     @Column (name = "email")
     String email;
@@ -34,6 +50,19 @@ public class UserEntity extends GenericEntity implements UserDetails{
     
     @Column (name = "avatar")
     String avatar;
+
+    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    List<ConversationEntity> createdConversations = new ArrayList<>();
+
+    @ManyToMany (mappedBy = "members", fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    Set<ConversationEntity> conversations;
+
+    @OneToMany (mappedBy = "user", fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    List<MessageEntity> messages = new ArrayList<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

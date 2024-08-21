@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.cosium.spring.data.jpa.entity.graph.repository.support.EntityGraphJpaRepositoryFactoryBean;
 import jakarta.persistence.EntityManagerFactory;
 
 import javax.sql.DataSource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +23,14 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+@Slf4j
 @Configuration
 @PropertySource(value = "classpath:application.properties")
 @ComponentScan(basePackages = { "com.truongphuc" })
-@EnableJpaRepositories(basePackages = { "com.truongphuc.repository" })
+@EnableJpaRepositories(
+        basePackages = { "com.truongphuc.repository" },
+        repositoryFactoryBeanClass = EntityGraphJpaRepositoryFactoryBean.class
+)
 @EnableTransactionManagement
 public class JpaConfig {
 
@@ -73,7 +79,7 @@ public class JpaConfig {
             dataSource.setUsername(userName);
             dataSource.setPassword(password);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("ERROR LOADING DATABASE PROPERTIES", e);
         }
 
         return dataSource;
@@ -83,7 +89,9 @@ public class JpaConfig {
         Properties properties = new Properties();
 //        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         properties.setProperty("hibernate.hbm2ddl.auto", "update");
+        properties.setProperty("hibernate.show_sql", "true");
         // properties.setProperty("hibernate.hbm2ddl.auto", "none");
+//        properties.setProperty("hibernate.enable_lazy_load_no_trans", "true");
 
         return properties;
     }

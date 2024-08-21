@@ -7,17 +7,12 @@ import com.truongphuc.dto.response.LogInResponse;
 import com.truongphuc.dto.response.RefreshResponse;
 import com.truongphuc.dto.response.SignUpResponse;
 import com.truongphuc.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @PropertySource(value = "classpath:application.properties")
 @RequiredArgsConstructor
@@ -43,8 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    private ApiResponse<RefreshResponse> refresh (HttpServletRequest request) {
-        String refreshToken = request.getHeader("Referer");
+    private ApiResponse<RefreshResponse> refresh (@RequestHeader("Referer") String refreshToken) {
 
         RefreshResponse result = authService.refresh(refreshToken);
 
@@ -52,11 +46,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    private ApiResponse<String> logout (HttpServletRequest request) {
-        String accessToken = request.getHeader("x-param");
+    private ApiResponse<String> logout (@RequestHeader("x-param") String accessToken) {
         authService.logOut(accessToken);
-
-
         return new ApiResponse<>("0000", "Success", "Success Log Out");
     }
     

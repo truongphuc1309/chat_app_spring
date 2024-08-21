@@ -1,11 +1,14 @@
 package com.truongphuc.service.impl;
 
+import com.truongphuc.constant.ExceptionCode;
 import com.truongphuc.constant.TokenType;
 import com.truongphuc.entity.TokenEntity;
+import com.truongphuc.exception.AppException;
 import com.truongphuc.repository.TokenRepository;
 import com.truongphuc.service.JwtService;
 import com.truongphuc.service.UserService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -132,7 +135,12 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public Claims parseToken(TokenType tokenType, String token) {
-        return Jwts.parserBuilder().setSigningKey(getKey(tokenType)).build().parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parserBuilder().setSigningKey(getKey(tokenType)).build().parseClaimsJws(token).getBody();
+        }
+        catch (Exception e) {
+            throw new AppException("No matching token", ExceptionCode.INVALID_TOKEN);
+        }
     }
 
     @Override

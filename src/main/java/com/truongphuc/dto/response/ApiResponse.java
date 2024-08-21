@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T extends Serializable> implements Serializable{
+public class ApiResponse<T> implements Serializable{
     String code;
     String message;
     T metaData;
