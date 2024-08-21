@@ -22,7 +22,10 @@ public enum ExceptionCode {
 
     // CONVERSATION EXCEPTION CODE
     NON_EXISTED_CONVERSATION("2001", HttpStatus.CONFLICT),
-    INVALID_MEMBER("2001", HttpStatus.CONFLICT)
+    INVALID_MEMBER("2002", HttpStatus.CONFLICT),
+
+    //MESSAGE EXCEPTION CODE
+    NON_EXISTED_MESSAGE("3001", HttpStatus.CONFLICT),
    ;
 
     ExceptionCode(String code, HttpStatusCode httpCode) {

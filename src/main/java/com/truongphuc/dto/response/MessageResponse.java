@@ -1,29 +1,23 @@
 package com.truongphuc.dto.response;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.ToString;
 import lombok.experimental.FieldDefaults;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
-public class LogInResponse implements Serializable{
+public class MessageResponse implements Serializable {
     String id;
-    String email;
-    String name;
-    String accessToken;
-    String refreshToken;
-
+    String content;
+    UserProfileResponse user;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
-
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime updatedAt;
 }

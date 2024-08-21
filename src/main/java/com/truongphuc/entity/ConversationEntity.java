@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +60,7 @@ public class ConversationEntity extends GenericEntity{
     @EqualsAndHashCode.Exclude
     Set<UserEntity> members;
 
-    @OneToMany (mappedBy = "conversation")
+    @OneToMany (mappedBy = "conversation", cascade = CascadeType.REMOVE)
     List<MessageEntity> messages;
 }
 

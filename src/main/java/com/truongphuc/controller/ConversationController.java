@@ -5,7 +5,7 @@ import com.truongphuc.dto.request.ConversationCreationRequest;
 import com.truongphuc.dto.request.RemoveFromConversationRequest;
 import com.truongphuc.dto.request.RenameConversationRequest;
 import com.truongphuc.dto.response.ApiResponse;
-import com.truongphuc.dto.response.ConversationResponse;
+import com.truongphuc.dto.response.ConversationDetailsResponse;
 import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.RenameConversationResponse;
 import com.truongphuc.service.ConversationService;
@@ -23,31 +23,31 @@ public class ConversationController {
     ConversationService conversationService;
 
     @PostMapping
-    public ApiResponse<ConversationResponse> createConversation(@RequestBody ConversationCreationRequest request){
+    public ApiResponse<ConversationDetailsResponse> createConversation(@RequestBody ConversationCreationRequest request){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        ConversationResponse response = conversationService.createConversation(userEmail, request);
+        ConversationDetailsResponse response = conversationService.createConversation(userEmail, request);
         return new ApiResponse<>("0000","Success created conversation", response);
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ConversationResponse> getConversationDetails(@PathVariable(name = "id") String conversationId){
+    public ApiResponse<ConversationDetailsResponse> getConversationDetails(@PathVariable(name = "id") String conversationId){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        ConversationResponse response = conversationService.getConversationById(userEmail, conversationId);
+        ConversationDetailsResponse response = conversationService.getConversationById(userEmail, conversationId);
         return new ApiResponse<>("0000","Success get conversation details", response);
     }
 
     @GetMapping("/all")
-    public ApiResponse<PageResponse<ConversationResponse>> getAllConversationsOfUser(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                                            @RequestParam(name = "limit", required = false, defaultValue = "10") int limit){
+    public ApiResponse<PageResponse<ConversationDetailsResponse>> getAllConversationsOfUser(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                                                            @RequestParam(name = "limit", required = false, defaultValue = "10") int limit){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        PageResponse<ConversationResponse> response = conversationService.getAllConversationsOfUser(userEmail, page, limit);
+        PageResponse<ConversationDetailsResponse> response = conversationService.getAllConversationsOfUser(userEmail, page, limit);
         return new ApiResponse<>("0000","Success get conversations", response);
     }
 
-    @GetMapping("/add")
-    public ApiResponse<ConversationResponse> addMemberToConversation(@RequestBody AddMemberToConversationRequest request){
+    @PostMapping("/add")
+    public ApiResponse<ConversationDetailsResponse> addMemberToConversation(@RequestBody AddMemberToConversationRequest request){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        ConversationResponse response = conversationService.addMemberToConversation(userEmail, request);
+        ConversationDetailsResponse response = conversationService.addMemberToConversation(userEmail, request);
         return new ApiResponse<>("0000","Success add new member", response);
     }
 
@@ -63,5 +63,12 @@ public class ConversationController {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         boolean response = conversationService.removeFromConversation(userEmail, request);
         return new ApiResponse<>("0000","Success remove member", response);
+    }
+
+    @DeleteMapping ("/{id}")
+    public ApiResponse<Boolean> deleteConversation (@PathVariable(name = "id") String conversationId){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean response = conversationService.deleteConversation(userEmail, conversationId);
+        return new ApiResponse<>("0000","Success delete conversation", response);
     }
 }

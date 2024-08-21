@@ -6,7 +6,7 @@ import com.truongphuc.dto.request.AddMemberToConversationRequest;
 import com.truongphuc.dto.request.ConversationCreationRequest;
 import com.truongphuc.dto.request.RemoveFromConversationRequest;
 import com.truongphuc.dto.request.RenameConversationRequest;
-import com.truongphuc.dto.response.ConversationResponse;
+import com.truongphuc.dto.response.ConversationDetailsResponse;
 import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.RenameConversationResponse;
 import com.truongphuc.entity.ConversationEntity;
@@ -42,7 +42,7 @@ public class ConversationServiceImpl implements ConversationService {
     ConversationUtil conversationUtil;
 
     @Override
-    public ConversationResponse createConversation(String userEmail, ConversationCreationRequest conversationCreationRequest) {
+    public ConversationDetailsResponse createConversation(String userEmail, ConversationCreationRequest conversationCreationRequest) {
         UserEntity foundUser = userRepository.findByEmail(userEmail).get();
         ConversationEntity newConversation = conversationMapper.toConversationEntity(conversationCreationRequest);
 
@@ -76,7 +76,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationResponse getConversationById(String userEmail, String conversationId) {
+    public ConversationDetailsResponse getConversationById(String userEmail, String conversationId) {
         Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
 
         Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(conversationId, NamedEntityGraph.fetching("conversation-with-members"));
@@ -92,7 +92,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public PageResponse<ConversationResponse> getAllConversationsOfUser(String userEmail, int page, int pageSize) {
+    public PageResponse<ConversationDetailsResponse> getAllConversationsOfUser(String userEmail, int page, int pageSize) {
         if (page <= 0 || pageSize <= 0)
             throw new AppException("Invalid argument", ExceptionCode.INVALID_ARGUMENT);
 
@@ -100,12 +100,12 @@ public class ConversationServiceImpl implements ConversationService {
         if (foundUser.isEmpty())
             throw new AppException("Invalid user", ExceptionCode.NON_EXISTED_USER);
 
-        Sort sorter = Sort.by(Sort.Direction.DESC, "createdAt");
+        Sort sorter = Sort.by(Sort.Direction.DESC, "updatedAt");
         Pageable pageable = PageRequest.of(page - 1, pageSize, sorter);
         Page<ConversationEntity> conversationPage = conversationRepository.findAllByMember(foundUser.get(), pageable);
 
-        return PageResponse.<ConversationResponse>builder()
-                .currentPage(conversationPage.getNumber())
+        return PageResponse.<ConversationDetailsResponse>builder()
+                .currentPage(conversationPage.getNumber() + 1)
                 .pageSize(conversationPage.getSize())
                 .totalPages(conversationPage.getTotalPages())
                 .totalElements(conversationPage.getNumberOfElements())
@@ -114,7 +114,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationResponse addMemberToConversation(String adminEmail, AddMemberToConversationRequest addMemberToConversationRequest) {
+    public ConversationDetailsResponse addMemberToConversation(String adminEmail, AddMemberToConversationRequest addMemberToConversationRequest) {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
         Optional<ConversationEntity> foundConversation = conversationRepository.findById(addMemberToConversationRequest.getConversationId());
         if (foundConversation.isEmpty())
@@ -177,6 +177,22 @@ public class ConversationServiceImpl implements ConversationService {
 
         foundConversation.get().getMembers().remove(foundMember.get());
         conversationRepository.save(foundConversation.get());
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteConversation(String userEmail, String conversationId) {
+        Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
+        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(conversationId, NamedEntityGraph.fetching("conversation-with-createdBy"));
+
+        if (foundConversation.isEmpty())
+            throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
+
+        if (!conversationUtil.isAdminOfConversation(foundUser.get(), foundConversation.get()))
+            throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
+
+        conversationRepository.deleteById(conversationId);
 
         return true;
     }
