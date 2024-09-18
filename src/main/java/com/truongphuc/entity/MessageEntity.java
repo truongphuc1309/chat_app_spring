@@ -56,4 +56,7 @@ public class MessageEntity extends GenericEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "conversation_id")
     ConversationEntity conversation;
+
+    @Column(name = "active")
+    boolean active;
 }

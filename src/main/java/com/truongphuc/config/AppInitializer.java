@@ -20,6 +20,7 @@ public class AppInitializer implements WebApplicationInitializer {
         ctx.register(JpaConfig.class);
         ctx.register(SecurityWebApplicationInitializer.class);
         ctx.register(SecurityConfig.class);
+        ctx.register(WebSocketConfig.class);
         servletContext.addListener(new ContextLoaderListener(ctx));
         // using servlet 3 api to dynamically create
         // spring dispatcher servlet

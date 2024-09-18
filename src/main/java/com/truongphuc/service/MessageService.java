@@ -15,5 +15,7 @@ public interface MessageService {
 
     MessageDetailsResponse getMessageById(String userEmail,String id);
 
-    boolean deleteMessage(String userEmail, String id);
+    MessageResponse getLastMessageOfConversation(String userEmail, String conversationId);
+
+    MessageDetailsResponse deleteMessage(String userEmail, String id);
 }

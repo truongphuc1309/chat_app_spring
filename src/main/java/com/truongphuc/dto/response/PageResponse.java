@@ -13,8 +13,9 @@ import java.util.List;
 @Builder
 public class PageResponse <T> implements Serializable {
     int currentPage;
-    int totalPages;
-    int totalElements;
+    long totalPages;
+    int numberOfElements;
+    long totalElements;
     int pageSize;
     List<T> content;
 }

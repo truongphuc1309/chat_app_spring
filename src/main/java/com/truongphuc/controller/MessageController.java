@@ -44,10 +44,17 @@ public class MessageController {
         return new ApiResponse<>("0000", "Success conversation's messages", result);
     }
 
-    @DeleteMapping("/{id}")
-    public ApiResponse<Boolean> deleteMessage(@PathVariable(name = "id") String id) {
+    @GetMapping("/last/{id}")
+    public ApiResponse<MessageResponse> getLastMessageOfConversation(@PathVariable(name = "id") String conversationId) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        boolean result = messageService.deleteMessage(userEmail, id);
+        MessageResponse result = messageService.getLastMessageOfConversation(userEmail, conversationId);
+        return new ApiResponse<>("0000", "Success conversation's last message", result);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<MessageDetailsResponse> deleteMessage(@PathVariable(name = "id") String id) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        MessageDetailsResponse result = messageService.deleteMessage(userEmail, id);
         return new ApiResponse<>("0000", "Success delete message", result);
     }
 }

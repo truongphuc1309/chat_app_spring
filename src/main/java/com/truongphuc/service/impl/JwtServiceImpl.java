@@ -7,10 +7,7 @@ import com.truongphuc.exception.AppException;
 import com.truongphuc.repository.TokenRepository;
 import com.truongphuc.service.JwtService;
 import com.truongphuc.service.UserService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -109,8 +106,14 @@ public class JwtServiceImpl implements JwtService {
             else
                 correctToken = foundToken.get().getRefreshToken();
 
-            return correctToken.equals(token) && !isExpired(tokenType, correctToken);
+            if(!correctToken.equals(token))
+                throw new AppException("Invalid token", ExceptionCode.INVALID_TOKEN);
+
+            if (isExpired(tokenType, correctToken))
+                throw new AppException("Expired toke", ExceptionCode.EXPIRED_TOKEN);
         }
+
+        return true;
     }
 
     @Override
@@ -138,7 +141,10 @@ public class JwtServiceImpl implements JwtService {
         try {
             return Jwts.parserBuilder().setSigningKey(getKey(tokenType)).build().parseClaimsJws(token).getBody();
         }
-        catch (Exception e) {
+        catch (ExpiredJwtException e) {
+            e.printStackTrace();
+            throw new AppException("Expired token", ExceptionCode.EXPIRED_TOKEN);
+        }catch (Exception e){
             throw new AppException("No matching token", ExceptionCode.INVALID_TOKEN);
         }
     }

@@ -16,6 +16,8 @@
 
         <tomcat.verion>10.1.26</tomcat.verion>
 
+        <jakarta.ws.version>2.0.0</jakarta.ws.version>
+
         <springframework.version>6.1.8</springframework.version>
         <spring.validation.version>3.2.1</spring.validation.version>
         <spring.data.version>3.3.2</spring.data.version>
@@ -59,6 +61,11 @@
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jasper</artifactId>
+            <version>${tomcat.verion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
             <version>${tomcat.verion}</version>
         </dependency>
 
@@ -137,6 +144,37 @@
             <version>${springframework.version}</version>
         </dependency>
 
+        <!-- spring validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>${spring.validation.version}</version>
+        </dependency>
+
+        <!-- Spring Websocket -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+
+        <!-- Jakarta websocket -->
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-api</artifactId>
+            <version>${jakarta.ws.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-client-api</artifactId>
+            <version>${jakarta.ws.version}</version>
+        </dependency>
+
 
         <!-- JWT -->
         <dependency>
@@ -155,12 +193,7 @@
             <version>${jwt.version}</version>
         </dependency>
 
-        <!-- spring validation -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-            <version>${spring.validation.version}</version>
-        </dependency>
+
 
         <!-- servlet api -->
         <dependency>
@@ -231,6 +264,11 @@
             <artifactId>hibernate-entitymanager</artifactId> 
             <version>5.2.3.Final</version> 
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.h2database</groupId>-->
+<!--            <artifactId>h2</artifactId>-->
+<!--            <version>2.2.224</version>-->
+<!--        </dependency>-->
 
            <!-- Mapstruct -->
         <dependency>

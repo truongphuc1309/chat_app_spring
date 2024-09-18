@@ -50,6 +50,7 @@ public class MessageServiceImpl implements MessageService {
                 .content(messageRequest.getContent())
                 .conversation(foundConversation.get())
                 .user(foundUser.get())
+                .active(true)
                 .build();
 
         MessageEntity result = messageRepository.save(newMessage);
@@ -79,7 +80,8 @@ public class MessageServiceImpl implements MessageService {
                 .currentPage(result.getNumber() + 1)
                 .pageSize(result.getSize())
                 .totalPages(result.getTotalPages())
-                .totalElements(result.getNumberOfElements())
+                .numberOfElements(result.getNumberOfElements())
+                .totalElements(result.getTotalElements())
                 .content(messageMapper.toMessageResponseList(result.getContent()))
                 .build();
     }
@@ -98,8 +100,28 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean deleteMessage(String userEmail, String id) {
-        Optional<MessageEntity> foundMessage = messageRepository.findMessageById(id, NamedEntityGraph.fetching("message-with-user"));
+    public MessageResponse getLastMessageOfConversation(String userEmail, String conversationId) {
+        Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
+        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(conversationId,  NamedEntityGraph.fetching("conversation-with-members"));
+
+        if (foundConversation.isEmpty())
+            throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
+
+        // Check whether user in conversation or not
+        if (!foundConversation.get().getMembers().contains(foundUser.get()))
+            throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
+
+        Optional<MessageEntity> lastMessage = messageRepository.getLastMessageOfConversation(conversationId, NamedEntityGraph.fetching("message-with-user"));
+
+        if (lastMessage.isEmpty())
+            throw new AppException("Conversation is empty", ExceptionCode.NON_MATCHED_MESSAGE);
+
+        return messageMapper.toMessageResponse(lastMessage.get());
+    }
+
+    @Override
+    public MessageDetailsResponse deleteMessage(String userEmail, String id) {
+        Optional<MessageEntity> foundMessage = messageRepository.findMessageById(id, NamedEntityGraph.fetching("message-with-user-and-conversation"));
         if (foundMessage.isEmpty())
             throw new AppException("Invalid message", ExceptionCode.NON_EXISTED_MESSAGE);
 
@@ -108,8 +130,9 @@ public class MessageServiceImpl implements MessageService {
         if (!foundMessage.get().getUser().equals(foundUser.get()))
             throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
 
-        messageRepository.delete(foundMessage.get());
+        foundMessage.get().setActive(false);
 
-        return true;
+        messageRepository.save(foundMessage.get());
+        return messageMapper.toMessageDetailsResponse(foundMessage.get());
     }
 }

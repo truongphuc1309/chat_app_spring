@@ -1,3 +1,6 @@
-- forgot password
-- handle security && filter exception
-- handle duplicated single conversation
+- send email verification
+- forgot password (B)
+- handle token logic for multi platform (B)
+- handle refresh token (F)
+- send file and img
+- handle change feature Realtime (creat, del chat)(F)

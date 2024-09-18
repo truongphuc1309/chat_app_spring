@@ -2,10 +2,8 @@ package com.truongphuc.service.impl;
 
 import com.cosium.spring.data.jpa.entity.graph.domain2.NamedEntityGraph;
 import com.truongphuc.constant.ExceptionCode;
-import com.truongphuc.dto.request.AddMemberToConversationRequest;
-import com.truongphuc.dto.request.ConversationCreationRequest;
-import com.truongphuc.dto.request.RemoveFromConversationRequest;
-import com.truongphuc.dto.request.RenameConversationRequest;
+import com.truongphuc.dto.request.*;
+import com.truongphuc.dto.response.ConversationAvatarChangeResponse;
 import com.truongphuc.dto.response.ConversationDetailsResponse;
 import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.RenameConversationResponse;
@@ -46,14 +44,16 @@ public class ConversationServiceImpl implements ConversationService {
         UserEntity foundUser = userRepository.findByEmail(userEmail).get();
         ConversationEntity newConversation = conversationMapper.toConversationEntity(conversationCreationRequest);
 
-        if (conversationCreationRequest.getAddedMembers().size() > 1)
+        if (conversationCreationRequest.isGroup())
         {
             if (conversationCreationRequest.getName() == null || conversationCreationRequest.getName().isEmpty())
                 throw new AppException ("Name is required", ExceptionCode.INVALID_ARGUMENT);
             newConversation.setGroup(true);
         }
-        else
+        else {
             newConversation.setGroup(false);
+            newConversation.setName(null);
+        }
 
         newConversation.setCreatedBy(foundUser);
         Set<UserEntity> newMembers = new HashSet<>();
@@ -68,6 +68,16 @@ public class ConversationServiceImpl implements ConversationService {
 
             newMembers.add(member.get());
         });
+
+        if (!conversationCreationRequest.isGroup()){
+            UserEntity firstMember = newMembers.toArray(new UserEntity[0])[0];
+            UserEntity secondMember = newMembers.toArray(new UserEntity[0])[1];
+
+            Optional<ConversationEntity> foundConversation = conversationRepository.findSingleConversationByMembers(firstMember, secondMember);
+
+            if (foundConversation.isPresent())
+                throw new AppException("Existed Conversation", ExceptionCode.EXISTED_CONVERSATION);
+        }
 
         newConversation.setMembers(newMembers);
         conversationRepository.save(newConversation);
@@ -92,6 +102,22 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
+    public ConversationDetailsResponse getSingleConversationByUser(String yourEmail, String restUserId) {
+        Optional<UserEntity> foundUser = userRepository.findByEmail(yourEmail);
+
+        Optional<UserEntity> restUser = userRepository.findById(restUserId);
+        if (foundUser.isEmpty() || restUser.isEmpty())
+            throw new AppException("Invalid user", ExceptionCode.NON_EXISTED_USER);
+
+        Optional<ConversationEntity> foundConversation = conversationRepository.findSingleConversationByMembers(foundUser.get(), restUser.get());
+
+        if (foundConversation.isEmpty())
+            throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
+
+        return conversationMapper.toConversationResponse(foundConversation.get());
+    }
+
+    @Override
     public PageResponse<ConversationDetailsResponse> getAllConversationsOfUser(String userEmail, int page, int pageSize) {
         if (page <= 0 || pageSize <= 0)
             throw new AppException("Invalid argument", ExceptionCode.INVALID_ARGUMENT);
@@ -108,7 +134,8 @@ public class ConversationServiceImpl implements ConversationService {
                 .currentPage(conversationPage.getNumber() + 1)
                 .pageSize(conversationPage.getSize())
                 .totalPages(conversationPage.getTotalPages())
-                .totalElements(conversationPage.getNumberOfElements())
+                .numberOfElements(conversationPage.getNumberOfElements())
+                .totalElements(conversationPage.getTotalElements())
                 .content(conversationMapper.toConversationResponseList(conversationPage.getContent()))
                 .build();
     }
@@ -116,7 +143,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public ConversationDetailsResponse addMemberToConversation(String adminEmail, AddMemberToConversationRequest addMemberToConversationRequest) {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findById(addMemberToConversationRequest.getConversationId());
+        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(addMemberToConversationRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-members"));
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
 
@@ -155,6 +182,26 @@ public class ConversationServiceImpl implements ConversationService {
                 .conversationId(result.getId())
                 .oldName(oldName)
                 .newName(result.getName())
+                .build();
+    }
+
+    @Override
+    public ConversationAvatarChangeResponse changeAvatarConversation(String adminEmail, ConversationAvatarChangeRequest changeAvatarRequest) {
+        Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
+        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(changeAvatarRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-createdBy"));
+
+        if (foundConversation.isEmpty())
+            throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
+
+        if (!conversationUtil.isAdminOfConversation(adminUser.get(), foundConversation.get()))
+            throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
+
+        foundConversation.get().setAvatar(changeAvatarRequest.getAvatar());
+        var result = conversationRepository.save(foundConversation.get());
+
+        return ConversationAvatarChangeResponse.builder()
+                .conversationId(result.getId())
+                .avatar(result.getAvatar())
                 .build();
     }
 

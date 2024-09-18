@@ -16,6 +16,7 @@ public class MessageResponse implements Serializable {
     String id;
     String content;
     UserProfileResponse user;
+    boolean active;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")

@@ -8,19 +8,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.io.Serializable;
-import java.util.Set;
-
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
-public class ConversationCreationRequest implements Serializable {
-    String name;
+public class ConversationAvatarChangeRequest {
+    @NotBlank(message = "conversationId is required")
+    @NotNull(message = "conversationId is required")
+    String conversationId;
 
-    @NotNull(message = "isGroup is required")
-    boolean group;
-
-    @NotNull (message = "members are required")
-    Set<String> addedMembers;
+    @NotBlank (message = "avatar is required")
+    @NotNull (message = "avatar is required")
+    String avatar;
 }

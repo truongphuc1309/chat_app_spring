@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleAuthenticationException(AuthenticationException exception) {
         ApiResponse<?> res = new ApiResponse<>();
 
-        ExceptionCode exceptionCode = ExceptionCode.UNAUTHORIZED;
+        ExceptionCode exceptionCode = ExceptionCode.UNAUTHENTICATED;
         res.setCode(exceptionCode.getCode());
         res.setMessage(exception.getMessage());
 
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler (value = BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<?>> hadleBadCredentialsException (BadCredentialsException exception){
+    public ResponseEntity<ApiResponse<?>> handleBadCredentialsException (BadCredentialsException exception){
         ApiResponse<?> res = new ApiResponse<>();
 
         ExceptionCode exceptionCode = ExceptionCode.UNAUTHORIZED;
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<?>> handleGeneralException(Exception exception) {
-        log.error("EXCEPTION {}", exception);
+        log.error("EXCEPTION ", exception);
 
         ApiResponse<?> res = new ApiResponse<>();
 

@@ -1,13 +1,7 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.AddMemberToConversationRequest;
-import com.truongphuc.dto.request.ConversationCreationRequest;
-import com.truongphuc.dto.request.RemoveFromConversationRequest;
-import com.truongphuc.dto.request.RenameConversationRequest;
-import com.truongphuc.dto.response.ApiResponse;
-import com.truongphuc.dto.response.ConversationDetailsResponse;
-import com.truongphuc.dto.response.PageResponse;
-import com.truongphuc.dto.response.RenameConversationResponse;
+import com.truongphuc.dto.request.*;
+import com.truongphuc.dto.response.*;
 import com.truongphuc.service.ConversationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +30,13 @@ public class ConversationController {
         return new ApiResponse<>("0000","Success get conversation details", response);
     }
 
+    @GetMapping("/user/{id}")
+    public ApiResponse<ConversationDetailsResponse> getSingleConversationByUser(@PathVariable(name = "id") String userId){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        ConversationDetailsResponse response = conversationService.getSingleConversationByUser(userEmail, userId);
+        return new ApiResponse<>("0000","Success get single conversation", response);
+    }
+
     @GetMapping("/all")
     public ApiResponse<PageResponse<ConversationDetailsResponse>> getAllConversationsOfUser(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
                                                                                             @RequestParam(name = "limit", required = false, defaultValue = "10") int limit){
@@ -56,6 +57,13 @@ public class ConversationController {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         RenameConversationResponse response = conversationService.renameConversation(userEmail, request);
         return new ApiResponse<>("0000","Success rename conversation", response);
+    }
+
+    @PatchMapping("/avatar")
+    public ApiResponse<ConversationAvatarChangeResponse> changeAvatarConversation (@RequestBody ConversationAvatarChangeRequest request){
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        ConversationAvatarChangeResponse response = conversationService.changeAvatarConversation(userEmail, request);
+        return new ApiResponse<>("0000","Success change conversation's conversation", response);
     }
 
     @PostMapping ("/remove")
