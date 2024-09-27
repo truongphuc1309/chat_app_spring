@@ -34,11 +34,23 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.refreshkey}")
     private String refreshKey;
 
+    @Value("${jwt.verifykey}")
+    private String verifyKey;
+
+    @Value("${jwt.resetkey}")
+    private String resetKey;
+
     @Value("${jwt.duration.access.hours}")
     private long durationAccessHours;
 
     @Value("${jwt.duration.refresh.hours}")
     private long durationRefreshHours;
+
+    @Value("${jwt.duration.verify.hours}")
+    private long durationVerifyHours;
+
+    @Value("${jwt.duration.reset.mins}")
+    private long durationResetMins;
 
     @Override
     public TokenEntity createTokenPair(UserDetails userDetails) {
@@ -76,6 +88,22 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateRefreshToken(UserDetails userDetails) {
         return generateToken(TokenType.REFRESH_TOKEN, userDetails, durationRefreshHours);
+    }
+
+    @Override
+    public String generateVerifyToken(UserDetails userDetails) {
+        return generateToken(TokenType.VERIFY_TOKEN, userDetails, durationVerifyHours);
+    }
+
+    @Override
+    public String generateResetToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .setIssuer("com.truongphuc")
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * durationResetMins))
+                .signWith(getKey(TokenType.RESET_TOKEN), SignatureAlgorithm.HS512)
+                .compact();
     }
 
     @Override
@@ -127,10 +155,27 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public Key getKey(TokenType tokenType) {
         String key = "";
-        if (tokenType.equals(TokenType.ACCESS_TOKEN))
-            key = secretKey;
-        else
-            key = refreshKey;
+
+        switch (tokenType) {
+            case ACCESS_TOKEN: {
+                key = secretKey;
+                break;
+            }
+            case REFRESH_TOKEN: {
+                key = refreshKey;
+                break;
+            }
+
+            case VERIFY_TOKEN: {
+                key = verifyKey;
+                break;
+            }
+
+            case RESET_TOKEN: {
+                key = resetKey;
+                break;
+            }
+        }
 
         byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);

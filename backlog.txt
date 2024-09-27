@@ -1,6 +1,7 @@
-- send email verification
-- forgot password (B)
+- change password
+- schedule for db
 - handle token logic for multi platform (B)
 - handle refresh token (F)
 - send file and img
 - handle change feature Realtime (creat, del chat)(F)
+- set time limit to send email

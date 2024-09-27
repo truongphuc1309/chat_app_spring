@@ -3,19 +3,27 @@ package com.truongphuc.service.impl;
 import com.truongphuc.constant.ExceptionCode;
 import com.truongphuc.constant.TokenType;
 import com.truongphuc.dto.request.LogInRequest;
+import com.truongphuc.dto.request.ResetPasswordRequest;
 import com.truongphuc.dto.request.SignUpRequest;
 import com.truongphuc.dto.response.LogInResponse;
 import com.truongphuc.dto.response.RefreshResponse;
 import com.truongphuc.dto.response.SignUpResponse;
+import com.truongphuc.dto.response.VerifyResponse;
+import com.truongphuc.entity.ResetPasswordTokenEntity;
 import com.truongphuc.entity.TokenEntity;
 import com.truongphuc.entity.UserEntity;
+import com.truongphuc.entity.VerifyTokenEntity;
 import com.truongphuc.exception.AppException;
 import com.truongphuc.mapper.AuthMapper;
+import com.truongphuc.repository.ResetPasswordTokenRepository;
 import com.truongphuc.repository.TokenRepository;
 import com.truongphuc.repository.UserRepository;
+import com.truongphuc.repository.VerifyTokenRepository;
 import com.truongphuc.service.AuthService;
 import com.truongphuc.service.JwtService;
+import com.truongphuc.service.MailService;
 import com.truongphuc.service.UserService;
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +34,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 
 @Slf4j
@@ -38,11 +47,14 @@ public class AuthServiceImpl implements AuthService{
     AuthenticationManager authenticationManager;
     PasswordEncoder passwordEncoder;
     TokenRepository tokenRepository;
+    VerifyTokenRepository verifyTokenRepository;
+    ResetPasswordTokenRepository resetPasswordTokenRepository;
     UserService userService;
     JwtService jwtService;
+    MailService mailService;
 
     @Override
-    public SignUpResponse signUp(SignUpRequest signUpRequest) {
+    public SignUpResponse signUp(SignUpRequest signUpRequest) throws MessagingException, UnsupportedEncodingException {
         UserEntity userEntity =  authMapper.toUserEntity(signUpRequest);
 
         //Check email exist
@@ -50,8 +62,19 @@ public class AuthServiceImpl implements AuthService{
         if (foundUser.isPresent())
             throw new AppException("Email is already in use", ExceptionCode.EXISTED_USER); 
 
+        userEntity.setActive(false);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
 
+        // Generate verify key and send email
+        String verifyToken = jwtService.generateVerifyToken(userEntity);
+        VerifyTokenEntity newVerifyToken = VerifyTokenEntity.builder()
+                .value(verifyToken)
+                .email(userEntity.getEmail())
+                .build();
+
+        verifyTokenRepository.save(newVerifyToken);
+
+        mailService.sendVerificationEmail(userEntity.getEmail(), verifyToken);
         return authMapper.toSignUpResponse(userRepository.save(userEntity));
 
     }
@@ -63,6 +86,9 @@ public class AuthServiceImpl implements AuthService{
 
         if (foundUser.isEmpty())
             throw new AppException("Email or Password is incorrect", ExceptionCode.EXISTED_USER);
+
+        if (!foundUser.get().isActive())
+            throw new AppException("Unverified account", ExceptionCode.INACTIVE_USER);
 
         TokenEntity tokenPair = jwtService.createTokenPair(foundUser.get());
 
@@ -82,11 +108,13 @@ public class AuthServiceImpl implements AuthService{
         String email = jwtService.extractEmail(TokenType.REFRESH_TOKEN, refreshToken);
         UserDetails foundUser = userService.getUserDetailsService().loadUserByUsername(email);
         Optional<TokenEntity> foundToken = tokenRepository.findByEmail(email);
+        if (foundToken.isEmpty())
+            throw new AppException("Token not found", ExceptionCode.INVALID_TOKEN);
+
         String accessToken = jwtService.generateAccessToken(foundUser);
-        if (foundToken.isPresent()) {
-            foundToken.get().setAccessToken(accessToken);
-            tokenRepository.save(foundToken.get());
-        }
+        foundToken.get().setAccessToken(accessToken);
+        tokenRepository.save(foundToken.get());
+
 
         return authMapper.toRefreshResponse(foundToken.get());
     }
@@ -100,6 +128,127 @@ public class AuthServiceImpl implements AuthService{
         Optional<TokenEntity> foundTokens = tokenRepository.findByEmail(email);
 
         foundTokens.ifPresent(tokenRepository::delete);
+    }
+
+    @Override
+    public VerifyResponse verifyEmail(String verifyToken) {
+        Optional<VerifyTokenEntity> foundToken = verifyTokenRepository.findByValue(verifyToken);
+        if (foundToken.isEmpty() || jwtService.isExpired(TokenType.VERIFY_TOKEN, verifyToken))
+            throw new AppException("Invalid Token", ExceptionCode.INVALID_TOKEN);
+
+
+        String email = jwtService.extractEmail(TokenType.VERIFY_TOKEN, verifyToken);
+
+        if (!foundToken.get().getEmail().equals(email))
+            throw new AppException("Invalid Token", ExceptionCode.INVALID_TOKEN);
+
+        Optional<UserEntity> foundUser = userRepository.findByEmail(email);
+        if (foundUser.isEmpty() || foundUser.get().isActive())
+            throw new AppException("Invalid Token", ExceptionCode.INVALID_TOKEN);
+
+        foundUser.get().setActive(true);
+        userRepository.save(foundUser.get());
+        verifyTokenRepository.delete(foundToken.get());
+
+        return VerifyResponse.builder()
+                .email(email)
+                .verified(true)
+                .build();
+    }
+
+    @Override
+    public String sendVerificationEmail(String email) throws MessagingException, UnsupportedEncodingException {
+        Optional<UserEntity> foundUser = userRepository.findByEmail(email);
+
+        if (foundUser.isEmpty() || foundUser.get().isActive())
+            throw new AppException("Invalid Email", ExceptionCode.INACTIVE_USER);
+
+        Optional<VerifyTokenEntity> foundToken = verifyTokenRepository.findByEmail(email);
+        VerifyTokenEntity  token = foundToken.orElseGet(() -> VerifyTokenEntity.builder()
+                .email(email)
+                .build());
+
+
+
+        String verifyToken = jwtService.generateVerifyToken(foundUser.get());
+        token.setValue(verifyToken);
+        verifyTokenRepository.save(token);
+
+        //Send email
+        mailService.sendVerificationEmail(email, verifyToken);
+
+
+        return email;
+    }
+
+    @Override
+    public String forgotPassword(String email) throws MessagingException, UnsupportedEncodingException {
+        Optional<UserEntity> foundUser = userRepository.findByEmail(email);
+
+        if (foundUser.isEmpty() || !foundUser.get().isActive())
+            throw new AppException("Invalid Email", ExceptionCode.INACTIVE_USER);
+
+
+
+        String resetToken = jwtService.generateResetToken(foundUser.get());
+
+        Optional<ResetPasswordTokenEntity> foundToken = resetPasswordTokenRepository.findByEmail(email);
+
+        if (foundToken.isPresent()) {
+            foundToken.get().setValue(resetToken);
+            resetPasswordTokenRepository.save(foundToken.get());
+        }else {
+            ResetPasswordTokenEntity newToken = ResetPasswordTokenEntity.builder()
+                    .value(resetToken)
+                    .email(email)
+                    .build();
+            resetPasswordTokenRepository.save(newToken);
+        }
+
+        // Send email
+        mailService.sendResetPasswordEmail(email, resetToken);
+
+        return email;
+    }
+
+    @Override
+    public String confirmResetPassword(String resetToken) {
+        Optional<ResetPasswordTokenEntity> foundToken = resetPasswordTokenRepository.findByValue(resetToken);
+        if (foundToken.isEmpty() || jwtService.isExpired(TokenType.RESET_TOKEN, resetToken))
+            throw new AppException("Invalid Token", ExceptionCode.INVALID_TOKEN);
+
+        String email = jwtService.extractEmail(TokenType.RESET_TOKEN, resetToken);
+        Optional<UserEntity> foundUser = userRepository.findByEmail(email);
+        if (foundUser.isEmpty() || !foundUser.get().isActive())
+            throw new AppException("Invalid User", ExceptionCode.INVALID_TOKEN);
+        return "Confirmed";
+    }
+
+    @Override
+    public String resetPassword(String resetToken, ResetPasswordRequest request) {
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        if (!newPassword.equals(confirmPassword))
+            throw  new AppException("Passwords do not match", ExceptionCode.INVALID_ARGUMENT);
+
+        Optional<ResetPasswordTokenEntity> foundToken = resetPasswordTokenRepository.findByValue(resetToken);
+        if (foundToken.isEmpty() || jwtService.isExpired(TokenType.RESET_TOKEN, resetToken))
+            throw new AppException("Invalid Token", ExceptionCode.INVALID_TOKEN);
+
+        String email = jwtService.extractEmail(TokenType.RESET_TOKEN, resetToken);
+        if (!foundToken.get().getEmail().equals(email))
+            throw new AppException("Invalid Token", ExceptionCode.INVALID_TOKEN);
+
+        Optional<UserEntity> foundUser = userRepository.findByEmail(email);
+        if (foundUser.isEmpty() || !foundUser.get().isActive())
+            throw new AppException("Invalid User", ExceptionCode.INVALID_TOKEN);
+
+        foundUser.get().setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(foundUser.get());
+        resetPasswordTokenRepository.delete(foundToken.get());
+
+        return email;
     }
 
 }

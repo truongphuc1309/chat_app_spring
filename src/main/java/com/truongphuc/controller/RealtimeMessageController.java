@@ -4,7 +4,6 @@ import com.truongphuc.constant.MessageAction;
 import com.truongphuc.dto.response.ConversationDetailsResponse;
 import com.truongphuc.dto.response.MessageDetailsResponse;
 import com.truongphuc.dto.response.RealtimeMessageResponse;
-import com.truongphuc.mapper.MessageMapper;
 import com.truongphuc.service.ConversationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Controller;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Controller
 public class RealtimeMessageController {
-     MessageMapper messageMapper;
      SimpMessagingTemplate simpMessagingTemplate;
      ConversationService conversationService;
 
@@ -28,9 +26,7 @@ public class RealtimeMessageController {
                   new RealtimeMessageResponse(MessageAction.SEND, request));
 
           ConversationDetailsResponse foundConversation = conversationService.getConversationById(request.getUser().getEmail(), request.getConversation().getId());
-          foundConversation.getMembers().forEach((e) -> {
-               simpMessagingTemplate.convertAndSend("/topic/conversation/list/" + e.getId(), foundConversation);
-          });
+          foundConversation.getMembers().forEach((e) -> simpMessagingTemplate.convertAndSend("/topic/conversation/list/" + e.getId(), foundConversation));
      }
 
      @MessageMapping ("/message/delete")

@@ -3,6 +3,7 @@ package com.truongphuc.controller;
 import com.truongphuc.dto.request.*;
 import com.truongphuc.dto.response.*;
 import com.truongphuc.service.ConversationService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,7 +18,7 @@ public class ConversationController {
     ConversationService conversationService;
 
     @PostMapping
-    public ApiResponse<ConversationDetailsResponse> createConversation(@RequestBody ConversationCreationRequest request){
+    public ApiResponse<ConversationDetailsResponse> createConversation(@RequestBody @Valid ConversationCreationRequest request){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         ConversationDetailsResponse response = conversationService.createConversation(userEmail, request);
         return new ApiResponse<>("0000","Success created conversation", response);

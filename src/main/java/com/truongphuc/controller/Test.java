@@ -1,14 +1,21 @@
 package com.truongphuc.controller;
 
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.stereotype.Controller;
+import com.truongphuc.service.MailService;
+import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import java.io.UnsupportedEncodingException;
+
+@RequiredArgsConstructor
+@RestController
 public class Test {
-    @MessageMapping("/greet")
-    @SendTo ("/topic/greet")
-    public String Greet (String mess){
-        return "Hello " + mess;
+    final private MailService mailService;
+
+    @GetMapping("/auth/test")
+    public boolean test () throws MessagingException, UnsupportedEncodingException {
+        mailService.sendResetPasswordEmail("truongngo1309@gmail.com", "123456");
+        return true;
     }
 }

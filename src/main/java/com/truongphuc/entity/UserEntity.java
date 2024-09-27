@@ -51,6 +51,9 @@ public class UserEntity extends GenericEntity implements UserDetails{
     @Column (name = "avatar")
     String avatar;
 
+    @Column (name = "active")
+    boolean active;
+
     @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude
     List<ConversationEntity> createdConversations = new ArrayList<>();

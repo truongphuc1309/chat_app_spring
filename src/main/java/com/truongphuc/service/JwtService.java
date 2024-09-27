@@ -14,6 +14,8 @@ public interface JwtService {
     TokenEntity createTokenPair (UserDetails userDetails);
     String generateAccessToken(UserDetails userDetails);
     String generateRefreshToken(UserDetails userDetails);
+    String generateVerifyToken(UserDetails userDetails);
+    String generateResetToken (UserDetails userDetails);
     String generateToken(TokenType tokenType, UserDetails userDetails, long durationHours);
     boolean verify(TokenType tokenType, String token);
     boolean isExpired(TokenType tokenType, String token);

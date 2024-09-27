@@ -21,6 +21,7 @@
         <springframework.version>6.1.8</springframework.version>
         <spring.validation.version>3.2.1</spring.validation.version>
         <spring.data.version>3.3.2</spring.data.version>
+        <spring.mail.version>3.2.1</spring.mail.version>
 
         <jwt.version>0.11.5</jwt.version>
 
@@ -37,6 +38,8 @@
 
         <mysql.connector.version>8.0.33</mysql.connector.version>
         <hibernate.version>4.3.6.Final</hibernate.version>
+
+        <thymeleaf.version>3.3.3</thymeleaf.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -151,6 +154,13 @@
             <version>${spring.validation.version}</version>
         </dependency>
 
+        <!-- Spring mail -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>${spring.mail.version}</version>
+        </dependency>
+
         <!-- Spring Websocket -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -200,7 +210,6 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <version>${servlet.api.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Lombok -->
@@ -208,7 +217,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!--Slf4j-->
@@ -264,17 +272,19 @@
             <artifactId>hibernate-entitymanager</artifactId> 
             <version>5.2.3.Final</version> 
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.h2database</groupId>-->
-<!--            <artifactId>h2</artifactId>-->
-<!--            <version>2.2.224</version>-->
-<!--        </dependency>-->
 
            <!-- Mapstruct -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
+        </dependency>
+
+        <!-- Thymeleaf-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>${thymeleaf.version}</version>
         </dependency>
     </dependencies>
 
