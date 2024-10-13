@@ -1,12 +1,12 @@
 package com.truongphuc.service;
 
-import com.truongphuc.dto.request.LogInRequest;
-import com.truongphuc.dto.request.ResetPasswordRequest;
-import com.truongphuc.dto.request.SignUpRequest;
-import com.truongphuc.dto.response.LogInResponse;
-import com.truongphuc.dto.response.RefreshResponse;
-import com.truongphuc.dto.response.SignUpResponse;
-import com.truongphuc.dto.response.VerifyResponse;
+import com.truongphuc.dto.request.auth.LogInRequest;
+import com.truongphuc.dto.request.auth.ResetPasswordRequest;
+import com.truongphuc.dto.request.auth.SignUpRequest;
+import com.truongphuc.dto.response.auth.LogInResponse;
+import com.truongphuc.dto.response.auth.RefreshResponse;
+import com.truongphuc.dto.response.auth.SignUpResponse;
+import com.truongphuc.dto.response.auth.VerifyResponse;
 import jakarta.mail.MessagingException;
 
 import java.io.UnsupportedEncodingException;

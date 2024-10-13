@@ -10,6 +10,7 @@ import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -32,13 +33,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         repositoryFactoryBeanClass = EntityGraphJpaRepositoryFactoryBean.class
 )
 @EnableTransactionManagement
-public class JpaConfig {
-
+public class JpaConfig implements BeanPostProcessor {
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-        entityManagerFactoryBean.setDataSource(dataSource());
         System.out.println("\n============================= CONNECTED TO MYSQL==============================");
+        entityManagerFactoryBean.setDataSource(dataSource());
         entityManagerFactoryBean.setPackagesToScan("com.truongphuc.entity");
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         entityManagerFactoryBean.setJpaVendorAdapter(vendorAdapter);

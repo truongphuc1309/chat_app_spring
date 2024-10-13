@@ -1,9 +1,9 @@
 package com.truongphuc.controller;
 
 import com.truongphuc.constant.MessageAction;
-import com.truongphuc.dto.response.ConversationDetailsResponse;
-import com.truongphuc.dto.response.MessageDetailsResponse;
-import com.truongphuc.dto.response.RealtimeMessageResponse;
+import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
+import com.truongphuc.dto.response.message.MessageDetailsResponse;
+import com.truongphuc.dto.response.message.RealtimeMessageResponse;
 import com.truongphuc.service.ConversationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

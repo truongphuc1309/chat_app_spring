@@ -6,17 +6,17 @@ import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE)
-@Getter
-@Setter
+@Data
 @Builder
-@Entity
 
+@Entity (name = "token")
 @Table(name = "token")
 public class TokenEntity extends GenericEntity{
-    @Column (name = "email", unique = true)
+    @Column (name = "email")
     String email;
 
     @Column (name = "access_token")

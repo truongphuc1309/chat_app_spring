@@ -2,18 +2,21 @@ package com.truongphuc.service.impl;
 
 import com.cosium.spring.data.jpa.entity.graph.domain2.NamedEntityGraph;
 import com.truongphuc.constant.ExceptionCode;
-import com.truongphuc.dto.request.*;
-import com.truongphuc.dto.response.ConversationAvatarChangeResponse;
-import com.truongphuc.dto.response.ConversationDetailsResponse;
+import com.truongphuc.dto.request.conversation.*;
+import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
+import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
 import com.truongphuc.dto.response.PageResponse;
-import com.truongphuc.dto.response.RenameConversationResponse;
+import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import com.truongphuc.entity.ConversationEntity;
+import com.truongphuc.entity.FileUploadEntity;
 import com.truongphuc.entity.UserEntity;
 import com.truongphuc.exception.AppException;
 import com.truongphuc.mapper.ConversationMapper;
 import com.truongphuc.repository.ConversationRepository;
 import com.truongphuc.repository.UserRepository;
+import com.truongphuc.service.CloudinaryService;
 import com.truongphuc.service.ConversationService;
+import com.truongphuc.service.FileUploadService;
 import com.truongphuc.util.ConversationUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +42,7 @@ public class ConversationServiceImpl implements ConversationService {
     ConversationRepository conversationRepository;
     ConversationMapper conversationMapper;
     ConversationUtil conversationUtil;
+    FileUploadService fileUploadService;
 
     @Override
     public ConversationDetailsResponse createConversation(String userEmail, ConversationCreationRequest conversationCreationRequest) {
@@ -186,22 +191,28 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationAvatarChangeResponse changeAvatarConversation(String adminEmail, ConversationAvatarChangeRequest changeAvatarRequest) {
+    public ConversationAvatarChangeResponse changeAvatarConversation(String adminEmail, ConversationAvatarChangeRequest changeAvatarRequest) throws Exception {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
         Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(changeAvatarRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-createdBy"));
 
-        if (foundConversation.isEmpty())
+        if (foundConversation.isEmpty() || !foundConversation.get().isGroup())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
 
         if (!conversationUtil.isAdminOfConversation(adminUser.get(), foundConversation.get()))
             throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
 
-        foundConversation.get().setAvatar(changeAvatarRequest.getAvatar());
-        var result = conversationRepository.save(foundConversation.get());
+        FileUploadEntity oldAvatar = foundConversation.get().getAvatar();
+
+        ConversationEntity updatedConversation = fileUploadService.uploadConversationAvatar(foundConversation.get(), changeAvatarRequest.getAvatar());
+
+        var result = conversationRepository.save(updatedConversation);
+
+        // Check and Delete old avatar
+        if (oldAvatar != null) fileUploadService.deleteFile(oldAvatar);
 
         return ConversationAvatarChangeResponse.builder()
                 .conversationId(result.getId())
-                .avatar(result.getAvatar())
+//                .avatar(result.getAvatar())
                 .build();
     }
 

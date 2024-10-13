@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<UserEntity,String>{
     Optional<UserEntity> findUserById(String id, EntityGraph entityGraph);
 
     @Query(value =
-            "SELECT u from user u where u.name like :key% or substring(u.email, 1, locate('@', u.email) - 1) like :key%"
+            "SELECT u from user u where u.name like :key% or substring(u.email, 1, locate('@', u.email) - 1) like :key% and u.active = true "
     )
     List<UserEntity> findAllByKey (@Param("key") String key);
 }

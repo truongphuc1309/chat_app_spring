@@ -13,7 +13,7 @@ public class AppInitializer implements WebApplicationInitializer {
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
-        System.out.println("\n\n======================== Starting Web Application Hehe==================");
+        System.out.println("\n\n======================== Starting Web Application ==================");
         AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
         // register our config class
         ctx.register(ApplicationContextConfig.class);
@@ -27,6 +27,7 @@ public class AppInitializer implements WebApplicationInitializer {
         // using servlet 3 api to dynamically create
         // spring dispatcher servlet
         ServletRegistration.Dynamic servlet = servletContext.addServlet("mvc", new DispatcherServlet(ctx));
+        servlet.setMultipartConfig(MultipartConfig.getMultipartConfigElement());
         servlet.setLoadOnStartup(1);
         servlet.addMapping("/");
     }

@@ -2,11 +2,12 @@ package com.truongphuc.service.impl;
 
 import com.cosium.spring.data.jpa.entity.graph.domain2.NamedEntityGraph;
 import com.truongphuc.constant.ExceptionCode;
-import com.truongphuc.dto.request.MessageRequest;
-import com.truongphuc.dto.response.MessageDetailsResponse;
-import com.truongphuc.dto.response.MessageResponse;
+import com.truongphuc.dto.request.message.MessageRequest;
+import com.truongphuc.dto.response.message.MessageDetailsResponse;
+import com.truongphuc.dto.response.message.MessageResponse;
 import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.entity.ConversationEntity;
+import com.truongphuc.entity.FileUploadEntity;
 import com.truongphuc.entity.MessageEntity;
 import com.truongphuc.entity.UserEntity;
 import com.truongphuc.exception.AppException;
@@ -14,6 +15,7 @@ import com.truongphuc.mapper.MessageMapper;
 import com.truongphuc.repository.ConversationRepository;
 import com.truongphuc.repository.MessageRepository;
 import com.truongphuc.repository.UserRepository;
+import com.truongphuc.service.FileUploadService;
 import com.truongphuc.service.MessageService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -34,9 +37,10 @@ public class MessageServiceImpl implements MessageService {
     ConversationRepository conversationRepository;
     MessageRepository messageRepository;
     MessageMapper messageMapper;
+    FileUploadService fileUploadService;
 
     @Override
-    public MessageDetailsResponse sendMessage(String userEmail, MessageRequest messageRequest) {
+    public MessageDetailsResponse sendMessage(String userEmail, MessageRequest messageRequest) throws IOException {
         Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
         Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(messageRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-members"));
 
@@ -47,11 +51,21 @@ public class MessageServiceImpl implements MessageService {
             throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
 
         MessageEntity newMessage = MessageEntity.builder()
+                .type("text")
                 .content(messageRequest.getContent())
                 .conversation(foundConversation.get())
                 .user(foundUser.get())
                 .active(true)
                 .build();
+
+
+        // Check if message was a file
+        if (messageRequest.getFile() != null){
+            FileUploadEntity newUploadedFile = fileUploadService.uploadFileMessage(messageRequest.getFile());
+            newMessage.setType("file");
+            newMessage.setFile(newUploadedFile);
+        }
+
 
         MessageEntity result = messageRepository.save(newMessage);
         foundConversation.get().setUpdatedAt(result.getCreatedAt());

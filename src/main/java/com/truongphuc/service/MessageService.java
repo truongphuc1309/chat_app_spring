@@ -1,15 +1,14 @@
 package com.truongphuc.service;
 
-import com.truongphuc.dto.request.MessageRequest;
-import com.truongphuc.dto.response.MessageDetailsResponse;
-import com.truongphuc.dto.response.MessageResponse;
+import com.truongphuc.dto.request.message.MessageRequest;
+import com.truongphuc.dto.response.message.MessageDetailsResponse;
+import com.truongphuc.dto.response.message.MessageResponse;
 import com.truongphuc.dto.response.PageResponse;
-import org.springframework.data.domain.Page;
 
-import java.util.List;
+import java.io.IOException;
 
 public interface MessageService {
-    MessageDetailsResponse sendMessage(String userEmail, MessageRequest messageRequest);
+    MessageDetailsResponse sendMessage(String userEmail, MessageRequest messageRequest) throws IOException;
 
     PageResponse<MessageResponse> getAllMessagesOfConversation(String userEmail, String conversationId, int page, int pageSize);
 

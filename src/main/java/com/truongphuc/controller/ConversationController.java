@@ -1,7 +1,10 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.*;
+import com.truongphuc.dto.request.conversation.*;
 import com.truongphuc.dto.response.*;
+import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
+import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
+import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import com.truongphuc.service.ConversationService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -9,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)
@@ -61,9 +67,10 @@ public class ConversationController {
     }
 
     @PatchMapping("/avatar")
-    public ApiResponse<ConversationAvatarChangeResponse> changeAvatarConversation (@RequestBody ConversationAvatarChangeRequest request){
+    public ApiResponse<ConversationAvatarChangeResponse> changeAvatarConversation (@RequestParam("conversationId") String conversationId, @RequestParam("avatar") MultipartFile avatar) throws Exception {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        ConversationAvatarChangeResponse response = conversationService.changeAvatarConversation(userEmail, request);
+        ConversationAvatarChangeRequest conversationAvatarChangeRequest = new ConversationAvatarChangeRequest(conversationId, avatar);
+        ConversationAvatarChangeResponse response = conversationService.changeAvatarConversation(userEmail, conversationAvatarChangeRequest);
         return new ApiResponse<>("0000","Success change conversation's conversation", response);
     }
 

@@ -1,9 +1,9 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.MessageRequest;
+import com.truongphuc.dto.request.message.MessageRequest;
 import com.truongphuc.dto.response.ApiResponse;
-import com.truongphuc.dto.response.MessageDetailsResponse;
-import com.truongphuc.dto.response.MessageResponse;
+import com.truongphuc.dto.response.message.MessageDetailsResponse;
+import com.truongphuc.dto.response.message.MessageResponse;
 import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.service.MessageService;
 import lombok.AccessLevel;
@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)
@@ -20,7 +23,15 @@ public class MessageController {
     MessageService messageService;
 
     @PostMapping
-    public ApiResponse<MessageDetailsResponse> sendMessage(@RequestBody MessageRequest messageRequest) {
+    public ApiResponse<MessageDetailsResponse> sendMessage(
+            @RequestParam("conversationId") String conversationId,
+            @RequestParam(value = "content", defaultValue = "") String content,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        MessageRequest messageRequest = MessageRequest.builder()
+                .conversationId(conversationId)
+                .content(content)
+                .file(file)
+                .build();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         MessageDetailsResponse result = messageService.sendMessage(userEmail, messageRequest);
         return new ApiResponse<>("0000", "Success send message", result);

@@ -4,8 +4,6 @@ package com.truongphuc.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -39,7 +37,7 @@ import java.util.*;
 @Table (name = "user")
 
 public class UserEntity extends GenericEntity implements UserDetails{
-    @Column (name = "email")
+    @Column (name = "email", unique = true)
     String email;
     
     @Column (name = "name")
@@ -47,12 +45,13 @@ public class UserEntity extends GenericEntity implements UserDetails{
     
     @Column (name = "password")
     String password;
-    
-    @Column (name = "avatar")
-    String avatar;
 
     @Column (name = "active")
     boolean active;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn (name = "avatar_file_id")
+    FileUploadEntity avatar;
 
     @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude

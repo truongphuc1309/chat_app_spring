@@ -1,9 +1,13 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.LogInRequest;
-import com.truongphuc.dto.request.ResetPasswordRequest;
-import com.truongphuc.dto.request.SignUpRequest;
+import com.truongphuc.dto.request.auth.LogInRequest;
+import com.truongphuc.dto.request.auth.ResetPasswordRequest;
+import com.truongphuc.dto.request.auth.SignUpRequest;
 import com.truongphuc.dto.response.*;
+import com.truongphuc.dto.response.auth.LogInResponse;
+import com.truongphuc.dto.response.auth.RefreshResponse;
+import com.truongphuc.dto.response.auth.SignUpResponse;
+import com.truongphuc.dto.response.auth.VerifyResponse;
 import com.truongphuc.service.AuthService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;

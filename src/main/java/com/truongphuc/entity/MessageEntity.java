@@ -57,6 +57,13 @@ public class MessageEntity extends GenericEntity{
     @JoinColumn (name = "conversation_id")
     ConversationEntity conversation;
 
+    @Column(name = "type")
+    String type;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn (name = "file_id")
+    FileUploadEntity file;
+
     @Column(name = "active")
     boolean active;
 }

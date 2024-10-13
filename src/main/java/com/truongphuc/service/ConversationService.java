@@ -1,11 +1,13 @@
 package com.truongphuc.service;
 
-import com.truongphuc.dto.request.*;
-import com.truongphuc.dto.response.ConversationAvatarChangeResponse;
-import com.truongphuc.dto.response.ConversationDetailsResponse;
+import com.truongphuc.dto.request.conversation.*;
+import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
+import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
 import com.truongphuc.dto.response.PageResponse;
-import com.truongphuc.dto.response.RenameConversationResponse;
+import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public interface ConversationService {
@@ -15,7 +17,7 @@ public interface ConversationService {
     PageResponse<ConversationDetailsResponse> getAllConversationsOfUser(String userEmail, int page, int pageSize);
     ConversationDetailsResponse addMemberToConversation(String adminEmail, AddMemberToConversationRequest addMemberToConversationRequest);
     RenameConversationResponse renameConversation(String adminEmail, RenameConversationRequest renameConversationRequest);
-    ConversationAvatarChangeResponse changeAvatarConversation(String adminEmail, ConversationAvatarChangeRequest changeAvatarRequest);
+    ConversationAvatarChangeResponse changeAvatarConversation(String adminEmail, ConversationAvatarChangeRequest changeAvatarRequest) throws Exception;
     boolean removeFromConversation(String userEmail, RemoveFromConversationRequest request);
     boolean deleteConversation(String userEmail, String conversationId);
 }

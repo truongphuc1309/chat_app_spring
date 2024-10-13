@@ -43,8 +43,9 @@ public class ConversationEntity extends GenericEntity{
     @Column (name = "name")
     String name;
 
-    @Column(name = "avatar")
-    String avatar;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "avatar_file_id")
+    FileUploadEntity avatar;
 
     @Column (name = "is_group")
     boolean isGroup;

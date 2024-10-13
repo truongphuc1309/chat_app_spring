@@ -36,7 +36,7 @@ public class SecurityConfig {
     private final UserService userService;
     private final AuthenticationEntryPoint authEntryPoint;
 
-    private String[] WHILE_LIST = { "/auth/**", "/ws/**"};
+    private final String[] WHILE_LIST = { "/auth/**", "/ws/**", "/test/**"};
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers(WHILE_LIST).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(Customizer.withDefaults())
                 .authenticationProvider(provider())
                 .addFilterBefore(preFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint));

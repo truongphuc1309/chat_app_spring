@@ -1,14 +1,19 @@
 package com.truongphuc.service.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Optional;
+
+import jakarta.mail.MessagingException;
+
 import com.truongphuc.constant.ExceptionCode;
 import com.truongphuc.constant.TokenType;
-import com.truongphuc.dto.request.LogInRequest;
-import com.truongphuc.dto.request.ResetPasswordRequest;
-import com.truongphuc.dto.request.SignUpRequest;
-import com.truongphuc.dto.response.LogInResponse;
-import com.truongphuc.dto.response.RefreshResponse;
-import com.truongphuc.dto.response.SignUpResponse;
-import com.truongphuc.dto.response.VerifyResponse;
+import com.truongphuc.dto.request.auth.LogInRequest;
+import com.truongphuc.dto.request.auth.ResetPasswordRequest;
+import com.truongphuc.dto.request.auth.SignUpRequest;
+import com.truongphuc.dto.response.auth.LogInResponse;
+import com.truongphuc.dto.response.auth.RefreshResponse;
+import com.truongphuc.dto.response.auth.SignUpResponse;
+import com.truongphuc.dto.response.auth.VerifyResponse;
 import com.truongphuc.entity.ResetPasswordTokenEntity;
 import com.truongphuc.entity.TokenEntity;
 import com.truongphuc.entity.UserEntity;
@@ -23,19 +28,17 @@ import com.truongphuc.service.AuthService;
 import com.truongphuc.service.JwtService;
 import com.truongphuc.service.MailService;
 import com.truongphuc.service.UserService;
-import jakarta.mail.MessagingException;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Optional;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -107,7 +110,7 @@ public class AuthServiceImpl implements AuthService{
 
         String email = jwtService.extractEmail(TokenType.REFRESH_TOKEN, refreshToken);
         UserDetails foundUser = userService.getUserDetailsService().loadUserByUsername(email);
-        Optional<TokenEntity> foundToken = tokenRepository.findByEmail(email);
+        Optional<TokenEntity> foundToken = tokenRepository.findByEmailAndToken(email, refreshToken);
         if (foundToken.isEmpty())
             throw new AppException("Token not found", ExceptionCode.INVALID_TOKEN);
 
@@ -125,8 +128,7 @@ public class AuthServiceImpl implements AuthService{
         if (!isValid) throw new AppException("Invalid Token", ExceptionCode.UNAUTHORIZED);
 
         String email = jwtService.extractEmail(TokenType.ACCESS_TOKEN, accessToken);
-        Optional<TokenEntity> foundTokens = tokenRepository.findByEmail(email);
-
+        Optional<TokenEntity> foundTokens = tokenRepository.findByEmailAndToken(email, accessToken);
         foundTokens.ifPresent(tokenRepository::delete);
     }
 

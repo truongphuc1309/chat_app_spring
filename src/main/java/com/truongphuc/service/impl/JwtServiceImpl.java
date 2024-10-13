@@ -60,23 +60,33 @@ public class JwtServiceImpl implements JwtService {
         String refreshToken = generateRefreshToken(userDetails);
 
         String email = userDetails.getUsername();
-        Optional<TokenEntity> foundToken = tokenRepository.findByEmail(email);
 
-        if (foundToken.isPresent()) {
-            foundToken.get().setAccessToken(accessToken);
-            foundToken.get().setRefreshToken(refreshToken);
-            tokenRepository.save(foundToken.get());
+//        Optional<TokenEntity> foundToken = tokenRepository.findByEmail(email);
+//
+//        if (foundToken.isPresent()) {
+//            foundToken.get().setAccessToken(accessToken);
+//            foundToken.get().setRefreshToken(refreshToken);
+//            tokenRepository.save(foundToken.get());
+//
+//            result = foundToken.get();
+//        }else{
+//            result = TokenEntity.builder()
+//                    .email(email)
+//                    .accessToken(accessToken)
+//                    .refreshToken(refreshToken)
+//                    .build();
+//            tokenRepository.save(result);
+//        }
+//
+//        return result;
 
-            result = foundToken.get();
-        }else{
-            result = TokenEntity.builder()
-                    .email(email)
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .build();
-            tokenRepository.save(result);
-        }
+        TokenEntity newToken = TokenEntity.builder()
+                .email(email)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
+        result = tokenRepository.save(newToken);
         return result;
     }
 
@@ -123,23 +133,22 @@ public class JwtServiceImpl implements JwtService {
         UserDetails foundUser = userService.getUserDetailsService().loadUserByUsername(extractedEmail);
         if (foundUser == null) return false;
 
-        Optional<TokenEntity> foundToken = tokenRepository.findByEmail(extractedEmail);
+        Optional<TokenEntity> foundToken = tokenRepository.findByEmailAndToken(extractedEmail, token);
         String correctToken = null;
 
-        if (foundToken.isEmpty()) {
+        if (foundToken.isEmpty())
             return false;
-        }else{
-            if (tokenType.equals(TokenType.ACCESS_TOKEN))
-                correctToken = foundToken.get().getAccessToken();
-            else
-                correctToken = foundToken.get().getRefreshToken();
 
-            if(!correctToken.equals(token))
-                throw new AppException("Invalid token", ExceptionCode.INVALID_TOKEN);
+        if (tokenType.equals(TokenType.ACCESS_TOKEN))
+            correctToken = foundToken.get().getAccessToken();
+        else
+            correctToken = foundToken.get().getRefreshToken();
 
-            if (isExpired(tokenType, correctToken))
-                throw new AppException("Expired toke", ExceptionCode.EXPIRED_TOKEN);
-        }
+        if(!correctToken.equals(token))
+            throw new AppException("Invalid token", ExceptionCode.INVALID_TOKEN);
+
+        if (isExpired(tokenType, correctToken))
+            throw new AppException("Expired toke", ExceptionCode.EXPIRED_TOKEN);
 
         return true;
     }
