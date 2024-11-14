@@ -1,6 +1,7 @@
 package com.truongphuc.controller;
 
 import com.truongphuc.dto.request.auth.ChangePasswordRequest;
+import com.truongphuc.dto.request.user.UserStatusRequest;
 import com.truongphuc.dto.request.user.UserUpdateRequest;
 import com.truongphuc.dto.response.ApiResponse;
 import com.truongphuc.dto.response.user.UserProfileResponse;
@@ -65,5 +66,12 @@ public class UserController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         String result = userService.changePassword(email, changePasswordRequest);
         return new ApiResponse<>("0000", "Success change password", result);
+    }
+
+    @PostMapping ("/status")
+    public ApiResponse<String> updateUserStatus (@RequestBody UserStatusRequest statusRequest){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        userService.updateUserStatus(email, statusRequest.isOnline());
+        return new ApiResponse<>("0000", "Success update status", "Success");
     }
 }

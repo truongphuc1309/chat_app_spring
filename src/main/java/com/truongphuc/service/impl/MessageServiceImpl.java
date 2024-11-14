@@ -141,10 +141,8 @@ public class MessageServiceImpl implements MessageService {
 
         Optional<MessageEntity> lastMessage = messageRepository.getLastMessageOfConversation(conversationId, NamedEntityGraph.fetching("message-with-user"));
 
-        if (lastMessage.isEmpty())
-            throw new AppException("Conversation is empty", ExceptionCode.NON_MATCHED_MESSAGE);
+        return lastMessage.map(messageMapper::toMessageResponse).orElse(null);
 
-        return messageMapper.toMessageResponse(lastMessage.get());
     }
 
     @Override

@@ -25,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+
 @RequiredArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)
 @Component
@@ -37,11 +38,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-//        log.info("=============== PreFilter ===============");
 
         try {
             String authHeader = request.getHeader("Authorization");
-//            log.info("authHeader: {}", authHeader);
             if (authHeader ==  null){
                 filterChain.doFilter(request, response);
                 return;

@@ -1,8 +1,6 @@
-package com.truongphuc.controller;
+package com.truongphuc.socket;
 
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
-import com.truongphuc.mapper.MessageMapper;
-import com.truongphuc.service.ConversationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,10 +12,8 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Controller
-public class RealtimeConversationController {
-    MessageMapper messageMapper;
+public class ConversationSocket {
     SimpMessagingTemplate simpMessagingTemplate;
-    ConversationService conversationService;
 
     @MessageMapping("/conversation")
     public void sendMessage(@Payload ConversationDetailsResponse request) {

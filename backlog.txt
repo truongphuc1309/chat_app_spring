@@ -1,8 +1,7 @@
-- header for ws
 - change password(f)
 - schedule for db(db)
 - handle refresh token (F)
-- send file and img (f,b)
 - handle change feature Realtime (creat, del chat)(F)
 - add name sender in conversation
 - set time limit to send email (b)
+-http://localhost:3000/c/ff80808192bcaf770192bcb4cb14000b: do not loading when access to this link directly

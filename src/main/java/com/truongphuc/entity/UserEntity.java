@@ -53,7 +53,7 @@ public class UserEntity extends GenericEntity implements UserDetails{
     boolean active;
 
     @Column (name="online")
-    boolean online = false;
+    boolean online;
 
     @EqualsAndHashCode.Exclude
     @OneToOne(cascade = CascadeType.ALL)

@@ -12,5 +12,7 @@ public interface UserMapper {
 
     @Mapping(target = "avatar", source = "avatar.url")
     UserProfileResponse toUserProfileResponse(UserEntity userEntity);
+
+    @Mapping(target = "avatar", source = "avatar.url")
     List<UserProfileResponse> toUserProfileResponseList(List<UserEntity> userEntities);
 }

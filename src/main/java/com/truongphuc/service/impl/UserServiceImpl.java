@@ -1,32 +1,25 @@
 package com.truongphuc.service.impl;
 
 import com.truongphuc.constant.ExceptionCode;
-import com.truongphuc.dto.FileUploadDto;
 import com.truongphuc.dto.request.auth.ChangePasswordRequest;
 import com.truongphuc.dto.request.user.UserUpdateRequest;
 import com.truongphuc.dto.response.user.UserProfileResponse;
 import com.truongphuc.entity.FileUploadEntity;
 import com.truongphuc.entity.UserEntity;
 import com.truongphuc.exception.AppException;
-import com.truongphuc.mapper.FileUploadMapper;
 import com.truongphuc.mapper.UserMapper;
-import com.truongphuc.repository.FileUploadRepository;
 import com.truongphuc.repository.UserRepository;
-import com.truongphuc.service.CloudinaryService;
 import com.truongphuc.service.FileUploadService;
 import com.truongphuc.service.UserService;
-
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +31,7 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     FileUploadService fileUploadService;
+
 
     @Override
     public UserDetailsService getUserDetailsService() {
@@ -139,6 +133,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(foundUser.get());
 
         return "changed";
+    }
+
+    @Override
+    public UserProfileResponse updateUserStatus(String email, boolean online) {
+        Optional<UserEntity> foundUser = userRepository.findByEmail(email);
+        if (foundUser.isEmpty() || !foundUser.get().isActive())
+            throw new AppException("Invalid user", ExceptionCode.INACTIVE_USER);
+
+        if (foundUser.get().isOnline() != online){
+            foundUser.get().setOnline(online);
+            var result = userRepository.save(foundUser.get());
+            return userMapper.toUserProfileResponse(result);
+        }
+
+        return userMapper.toUserProfileResponse(foundUser.get());
     }
 
 }

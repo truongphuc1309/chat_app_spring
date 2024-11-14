@@ -1,4 +1,4 @@
-package com.truongphuc.controller;
+package com.truongphuc.socket;
 
 import com.truongphuc.constant.MessageAction;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Controller
-public class RealtimeMessageController {
+public class MessageSocket {
      SimpMessagingTemplate simpMessagingTemplate;
      ConversationService conversationService;
 
