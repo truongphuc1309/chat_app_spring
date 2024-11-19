@@ -1,14 +1,16 @@
-package com.truongphuc.dto.response.conversation;
+package com.truongphuc.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.truongphuc.dto.MemberDto;
 import com.truongphuc.dto.response.user.UserProfileResponse;
+import com.truongphuc.entity.FileUploadEntity;
+import com.truongphuc.entity.UserEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import javax.enterprise.context.Conversation;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -17,16 +19,16 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
-public class ConversationDetailsResponse implements Serializable {
+public class ConversationDto implements Serializable {
     String id;
 
     String name;
 
-    String avatar;
+    FileUploadEntity avatar;
 
     boolean isGroup;
 
-    UserProfileResponse createdBy;
+    UserEntity createdBy;
 
     Set<MemberDto> members;
 

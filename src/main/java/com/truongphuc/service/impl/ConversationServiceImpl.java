@@ -1,7 +1,8 @@
 package com.truongphuc.service.impl;
 
-import com.cosium.spring.data.jpa.entity.graph.domain2.NamedEntityGraph;
 import com.truongphuc.constant.ExceptionCode;
+import com.truongphuc.dto.ConversationDto;
+import com.truongphuc.dto.MemberDto;
 import com.truongphuc.dto.request.conversation.*;
 import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
@@ -9,15 +10,18 @@ import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import com.truongphuc.entity.ConversationEntity;
 import com.truongphuc.entity.FileUploadEntity;
+import com.truongphuc.entity.ParticipantEntity;
 import com.truongphuc.entity.UserEntity;
 import com.truongphuc.exception.AppException;
 import com.truongphuc.mapper.ConversationMapper;
+import com.truongphuc.mapper.UserMapper;
 import com.truongphuc.repository.ConversationRepository;
+import com.truongphuc.repository.ParticipantRepository;
 import com.truongphuc.repository.UserRepository;
-import com.truongphuc.service.CloudinaryService;
 import com.truongphuc.service.ConversationService;
 import com.truongphuc.service.FileUploadService;
 import com.truongphuc.util.ConversationUtil;
+import com.truongphuc.util.impl.ConversationUtilImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,7 +32,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -39,16 +42,20 @@ import java.util.Set;
 @Service
 public class ConversationServiceImpl implements ConversationService {
     UserRepository userRepository;
+    UserMapper userMapper;
     ConversationRepository conversationRepository;
     ConversationMapper conversationMapper;
     ConversationUtil conversationUtil;
     FileUploadService fileUploadService;
+    ParticipantRepository participantRepository;
+    private final ConversationUtilImpl conversationUtilImpl;
 
     @Override
     public ConversationDetailsResponse createConversation(String userEmail, ConversationCreationRequest conversationCreationRequest) {
         UserEntity foundUser = userRepository.findByEmail(userEmail).get();
         ConversationEntity newConversation = conversationMapper.toConversationEntity(conversationCreationRequest);
 
+        // Check if conversation is group
         if (conversationCreationRequest.isGroup())
         {
             if (conversationCreationRequest.getName() == null || conversationCreationRequest.getName().isEmpty())
@@ -78,32 +85,50 @@ public class ConversationServiceImpl implements ConversationService {
             UserEntity firstMember = newMembers.toArray(new UserEntity[0])[0];
             UserEntity secondMember = newMembers.toArray(new UserEntity[0])[1];
 
-            Optional<ConversationEntity> foundConversation = conversationRepository.findSingleConversationByMembers(firstMember, secondMember);
+            Optional<ConversationEntity> foundConversation = conversationUtil.getSingleConversation(firstMember, secondMember);
 
-            if (foundConversation.isPresent())
+            if (foundConversation.isPresent() && !foundConversation.get().isGroup())
                 throw new AppException("Existed Conversation", ExceptionCode.EXISTED_CONVERSATION);
         }
 
-        newConversation.setMembers(newMembers);
-        conversationRepository.save(newConversation);
 
-        return conversationMapper.toConversationResponse(newConversation);
+        var createdConversation = conversationRepository.save(newConversation);
+
+        // Create all participant
+        newMembers.forEach(member -> {
+            ParticipantEntity newParticipant = ParticipantEntity.builder()
+                    .conversation(createdConversation)
+                    .user(member)
+                    .build();
+            participantRepository.save(newParticipant);
+        });
+
+        ConversationDetailsResponse response = conversationMapper.toConversationResponse(createdConversation);
+        Set<MemberDto> memberDtoSet = conversationUtil.getMemberDtoListOfConversation(createdConversation);
+        response.setMembers(memberDtoSet);
+
+        return response;
     }
 
     @Override
     public ConversationDetailsResponse getConversationById(String userEmail, String conversationId) {
         Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
 
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(conversationId, NamedEntityGraph.fetching("conversation-with-members"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(conversationId);
 
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
 
-        Set<UserEntity> members = foundConversation.get().getMembers();
+        Set<UserEntity> members = conversationUtil.getMembersOfConversation(foundConversation.get());
         if (!members.contains(foundUser.get()))
             throw new AppException("Can not access to another user's conversation", ExceptionCode.INVALID_MEMBER);
 
-        return conversationMapper.toConversationResponse(foundConversation.get());
+        ConversationDetailsResponse response = conversationMapper.toConversationResponse(foundConversation.get());
+        Set<MemberDto> memberDtoSet = conversationUtil.getMemberDtoListOfConversation(foundConversation.get());
+
+        response.setMembers(memberDtoSet);
+
+        return response;
     }
 
     @Override
@@ -114,7 +139,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (foundUser.isEmpty() || restUser.isEmpty())
             throw new AppException("Invalid user", ExceptionCode.NON_EXISTED_USER);
 
-        Optional<ConversationEntity> foundConversation = conversationRepository.findSingleConversationByMembers(foundUser.get(), restUser.get());
+        Optional<ConversationEntity> foundConversation = conversationUtil.getSingleConversation(foundUser.get(), restUser.get());
 
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
@@ -127,13 +152,12 @@ public class ConversationServiceImpl implements ConversationService {
         if (page <= 0 || pageSize <= 0)
             throw new AppException("Invalid argument", ExceptionCode.INVALID_ARGUMENT);
 
-        Optional<UserEntity> foundUser = userRepository.findUserByEmail(userEmail, NamedEntityGraph.fetching("user-with-conversations"));
+        Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
         if (foundUser.isEmpty())
             throw new AppException("Invalid user", ExceptionCode.NON_EXISTED_USER);
 
-        Sort sorter = Sort.by(Sort.Direction.DESC, "updatedAt");
-        Pageable pageable = PageRequest.of(page - 1, pageSize, sorter);
-        Page<ConversationEntity> conversationPage = conversationRepository.findAllByMember(foundUser.get(), pageable);
+        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Page<ConversationDto> conversationPage = conversationUtil.getConversationsOfUser(foundUser.get(),pageable);
 
         return PageResponse.<ConversationDetailsResponse>builder()
                 .currentPage(conversationPage.getNumber() + 1)
@@ -148,9 +172,13 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public ConversationDetailsResponse addMemberToConversation(String adminEmail, AddMemberToConversationRequest addMemberToConversationRequest) {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(addMemberToConversationRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-members"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(addMemberToConversationRequest.getConversationId());
+
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
+
+        Set<UserEntity> members = conversationUtil.getMembersOfConversation(foundConversation.get());
+
 
         if (!conversationUtil.isAdminOfConversation(adminUser.get(), foundConversation.get()))
             throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
@@ -159,17 +187,34 @@ public class ConversationServiceImpl implements ConversationService {
         if (foundUser.isEmpty())
             throw new AppException("Invalid user", ExceptionCode.NON_EXISTED_USER);
 
-        foundConversation.get().getMembers().add(foundUser.get());
+        if (members.contains(foundUser.get()))
+            throw new AppException("Duplicate member", ExceptionCode.INVALID_MEMBER);
+
+        // Add member
+        ParticipantEntity newParticipant = ParticipantEntity.builder()
+                .user(foundUser.get())
+                .conversation(foundConversation.get())
+                .build();
+
+        participantRepository.save(newParticipant);
 
         ConversationEntity result = conversationRepository.save(foundConversation.get());
 
-        return conversationMapper.toConversationResponse(result);
+
+        // Get updated members
+        Set<MemberDto> memberDtoSet = conversationUtil.getMemberDtoListOfConversation(result);
+
+
+        ConversationDetailsResponse response =  conversationMapper.toConversationResponse(result);
+        response.setMembers(memberDtoSet);
+
+        return response;
     }
 
     @Override
     public RenameConversationResponse renameConversation(String adminEmail, RenameConversationRequest renameConversationRequest) {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(renameConversationRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-createdBy"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(renameConversationRequest.getConversationId());
 
         if (adminUser.isEmpty())
             throw new AppException("Invalid user", ExceptionCode.NON_EXISTED_USER);
@@ -197,7 +242,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public ConversationAvatarChangeResponse changeAvatarConversation(String adminEmail, ConversationAvatarChangeRequest changeAvatarRequest) throws Exception {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(changeAvatarRequest.getConversationId(), NamedEntityGraph.fetching("conversation-with-createdBy"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(changeAvatarRequest.getConversationId());
 
         if (foundConversation.isEmpty() || !foundConversation.get().isGroup())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
@@ -223,7 +268,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public void removeAvatarConversation(String adminEmail,  String conversationId) throws Exception {
         Optional<UserEntity> adminUser = userRepository.findByEmail(adminEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(conversationId, NamedEntityGraph.fetching("conversation-with-createdBy"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(conversationId);
 
 
         if (foundConversation.isEmpty() || !foundConversation.get().isGroup())
@@ -244,9 +289,13 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public boolean removeFromConversation(String userEmail, RemoveFromConversationRequest request) {
         Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(request.getConversationId(), NamedEntityGraph.fetching("conversation-with-members"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(request.getConversationId());
+
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
+
+        Set<UserEntity> members = conversationUtil.getMembersOfConversation(foundConversation.get());
+
 
         Optional<UserEntity> foundMember = userRepository.findById(request.getMemberId());
         if (foundMember.isEmpty())
@@ -255,11 +304,14 @@ public class ConversationServiceImpl implements ConversationService {
         if (!foundMember.get().equals(foundUser.get()) && !conversationUtil.isAdminOfConversation(foundUser.get(), foundConversation.get()))
             throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
 
-        if (!foundConversation.get().getMembers().contains(foundMember.get()))
+        if (!members.contains(foundMember.get()))
             throw new AppException("Invalid access", ExceptionCode.INVALID_ROLE);
 
-        foundConversation.get().getMembers().remove(foundMember.get());
-        conversationRepository.save(foundConversation.get());
+        // Remove member
+        Optional<ParticipantEntity> foundParticipant =  participantRepository.findByUserAndConversation(foundMember.get(), foundConversation.get());
+        if (foundParticipant.isEmpty())
+            throw new AppException("Invalid user", ExceptionCode.INVALID_MEMBER);
+        participantRepository.delete(foundParticipant.get());
 
         return true;
     }
@@ -267,7 +319,7 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public boolean deleteConversation(String userEmail, String conversationId) {
         Optional<UserEntity> foundUser = userRepository.findByEmail(userEmail);
-        Optional<ConversationEntity> foundConversation = conversationRepository.findConversationById(conversationId, NamedEntityGraph.fetching("conversation-with-createdBy"));
+        Optional<ConversationEntity> foundConversation = conversationRepository.findById(conversationId);
 
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
@@ -275,6 +327,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (!conversationUtil.isAdminOfConversation(foundUser.get(), foundConversation.get()))
             throw new AppException("Forbidden to access", ExceptionCode.INVALID_ROLE);
 
+        participantRepository.deleteAllByConversation(foundConversation.get());
         conversationRepository.deleteById(conversationId);
 
         return true;

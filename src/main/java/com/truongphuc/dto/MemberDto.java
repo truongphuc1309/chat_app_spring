@@ -1,8 +1,6 @@
-package com.truongphuc.dto.response.conversation;
+package com.truongphuc.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.truongphuc.dto.MemberDto;
-import com.truongphuc.dto.response.user.UserProfileResponse;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,27 +9,18 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Data
-public class ConversationDetailsResponse implements Serializable {
+public class MemberDto implements Serializable {
     String id;
-
+    String email;
     String name;
-
     String avatar;
-
-    boolean isGroup;
-
-    UserProfileResponse createdBy;
-
-    Set<MemberDto> members;
-
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    LocalDateTime createdAt;
+    boolean online;
+    long lastRead;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime updatedAt;

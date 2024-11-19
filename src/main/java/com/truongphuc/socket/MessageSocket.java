@@ -2,6 +2,7 @@ package com.truongphuc.socket;
 
 import com.truongphuc.constant.MessageAction;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
+import com.truongphuc.dto.response.message.LastReadMessageResponse;
 import com.truongphuc.dto.response.message.MessageDetailsResponse;
 import com.truongphuc.dto.response.message.RealtimeMessageResponse;
 import com.truongphuc.service.ConversationService;
@@ -34,5 +35,10 @@ public class MessageSocket {
           simpMessagingTemplate.convertAndSend("/topic/conversation/" + request.getConversation().getId(),
                   new RealtimeMessageResponse(MessageAction.DELETE, request));
           simpMessagingTemplate.convertAndSend("/topic/message/last/" + request.getConversation().getId(), request);
+     }
+
+     @MessageMapping ("/message/last-read")
+     public void deleteMessage(@Payload LastReadMessageResponse request) {
+          simpMessagingTemplate.convertAndSend("/topic/last-message/" + request.getId(), request);
      }
 }

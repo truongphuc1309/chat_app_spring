@@ -24,6 +24,7 @@ public class MessageDetailsResponse implements Serializable {
     ConversationResponse conversation;
     String type;
     FileResponse file;
+    long seq;
     boolean active;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;

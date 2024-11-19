@@ -7,6 +7,7 @@ import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
 import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import com.truongphuc.service.ConversationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,8 +46,8 @@ public class ConversationController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<PageResponse<ConversationDetailsResponse>> getAllConversationsOfUser(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                                                            @RequestParam(name = "limit", required = false, defaultValue = "10") int limit){
+    public ApiResponse<PageResponse<ConversationDetailsResponse>> getAllConversationsOfUser(@Min(1) @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                                                           @Min(1) @RequestParam(name = "limit", required = false, defaultValue = "10") int limit){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         PageResponse<ConversationDetailsResponse> response = conversationService.getAllConversationsOfUser(userEmail, page, limit);
         return new ApiResponse<>("0000","Success get conversations", response);

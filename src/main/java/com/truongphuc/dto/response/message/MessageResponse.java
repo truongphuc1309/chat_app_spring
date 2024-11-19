@@ -17,12 +17,13 @@ import java.time.LocalDateTime;
 public class MessageResponse implements Serializable {
     String id;
     String content;
-    UserProfileResponse user;
     boolean active;
+    long seq;
     String type;
-    FileResponse file;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdAt;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     LocalDateTime updatedAt;
+    UserProfileResponse user;
+    FileResponse file;
 }

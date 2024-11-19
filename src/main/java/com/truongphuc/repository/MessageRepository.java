@@ -16,8 +16,8 @@ import java.util.Optional;
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, String> {
     Optional<MessageEntity> findMessageById(String id, EntityGraph entityGraph);
-    Page<MessageEntity> findAllByConversation(ConversationEntity conversation, EntityGraph entityGraph, Pageable pageable);
+    Page<MessageEntity> findAllByConversation(ConversationEntity conversation, Pageable pageable);
 
     @Query ("select m from  message m where  m.conversation.id = :conversationId and  m.createdAt = (select max (m1.createdAt) from message m1 where m1.conversation.id =:conversationId)")
-    Optional<MessageEntity> getLastMessageOfConversation (@Param("conversationId") String conversationId, EntityGraph entityGraph);
+    Optional<MessageEntity> getLastMessageOfConversation (@Param("conversationId") String conversationId);
 }

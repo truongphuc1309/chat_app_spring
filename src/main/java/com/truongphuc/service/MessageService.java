@@ -1,6 +1,8 @@
 package com.truongphuc.service;
 
 import com.truongphuc.dto.request.message.MessageRequest;
+import com.truongphuc.dto.request.message.ReadLastMessageRequest;
+import com.truongphuc.dto.response.message.LastReadMessageResponse;
 import com.truongphuc.dto.response.message.MessageDetailsResponse;
 import com.truongphuc.dto.response.message.MessageResponse;
 import com.truongphuc.dto.response.PageResponse;
@@ -17,4 +19,6 @@ public interface MessageService {
     MessageResponse getLastMessageOfConversation(String userEmail, String conversationId);
 
     MessageDetailsResponse deleteMessage(String userEmail, String id) throws Exception;
+
+    LastReadMessageResponse readLastMessageOfConversation(String userEmail, String lastMessageId) throws Exception;
 }

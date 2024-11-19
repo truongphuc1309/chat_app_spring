@@ -68,7 +68,7 @@ public class AuthController {
     @PostMapping ("/confirm-reset-password")
     private ApiResponse<String> resetPassword (@RequestHeader("X-Referer") String resetToken) {
         String result = authService.confirmResetPassword (resetToken);
-        return new ApiResponse<>("0000", "Success reset password", result);
+        return new ApiResponse<>("0000", "Success confirm", result);
     }
 
     @PostMapping ("/reset-password")

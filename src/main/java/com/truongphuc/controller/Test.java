@@ -1,21 +1,27 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.FileUploadDto;
+import com.truongphuc.dto.ConversationDto;
+import com.truongphuc.entity.ConversationEntity;
 import com.truongphuc.service.CloudinaryService;
+import com.truongphuc.util.ConversationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor
 @RestController
 public class Test {
     final private CloudinaryService cloudinaryService;
+    final private ConversationUtil conversationUtil;
 
     @GetMapping(value = "/test")
-    public FileUploadDto test (@RequestParam(name = "file") MultipartFile file) throws Exception {
-        return cloudinaryService.uploadMessageFile(file);
+    public List<ConversationDto> test () throws Exception {
+//        return conversationUtil.getConversationsOfUser("ff8080819331277301933127ae160001", PageRequest.of(0, 10));
+
+        return null;
     }
 }

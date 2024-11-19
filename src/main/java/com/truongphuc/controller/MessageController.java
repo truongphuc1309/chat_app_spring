@@ -1,7 +1,9 @@
 package com.truongphuc.controller;
 
 import com.truongphuc.dto.request.message.MessageRequest;
+import com.truongphuc.dto.request.message.ReadLastMessageRequest;
 import com.truongphuc.dto.response.ApiResponse;
+import com.truongphuc.dto.response.message.LastReadMessageResponse;
 import com.truongphuc.dto.response.message.MessageDetailsResponse;
 import com.truongphuc.dto.response.message.MessageResponse;
 import com.truongphuc.dto.response.PageResponse;
@@ -75,5 +77,12 @@ public class MessageController {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         MessageDetailsResponse result = messageService.deleteMessage(userEmail, id);
         return new ApiResponse<>("0000", "Success delete message", result);
+    }
+
+    @PostMapping("/last-read/{id}")
+    public ApiResponse<LastReadMessageResponse> readLastMessage(@PathVariable(name = "id") String id) throws Exception {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        LastReadMessageResponse result = messageService.readLastMessageOfConversation(userEmail, id);
+        return new ApiResponse<>("0000", "Success ", result);
     }
 }

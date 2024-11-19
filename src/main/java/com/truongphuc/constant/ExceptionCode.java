@@ -38,6 +38,9 @@ public enum ExceptionCode {
     // UPLOAD EXCEPTION CODE
     INVALID_FILE_SIZE("5001", HttpStatus.CONFLICT),
     INVALID_FILE_TYPE ("5002", HttpStatus.CONFLICT),
+
+    // Mail
+    OVER_LIMIT("6001", HttpStatus.CONFLICT),
    ;
 
     ExceptionCode(String code, HttpStatusCode httpCode) {

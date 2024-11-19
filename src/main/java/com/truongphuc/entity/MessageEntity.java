@@ -35,28 +35,28 @@ import lombok.experimental.FieldDefaults;
                 }
         ),
 
-        @NamedEntityGraph(
-                name = "message-with-user-and-conversation",
-                attributeNodes = {
-                        @NamedAttributeNode(value = "conversation", subgraph = "conversation-with-members"),
-                        @NamedAttributeNode(value = "user", subgraph = "user-with-avatar"),
-                        @NamedAttributeNode(value = "file")
-                },
-                subgraphs = {
-                        @NamedSubgraph(
-                                name = "conversation-with-members",
-                                attributeNodes = {
-                                        @NamedAttributeNode(value = "members"),
-                                }
-                        ),
-                        @NamedSubgraph(
-                                name = "user-with-avatar",
-                                attributeNodes = {
-                                        @NamedAttributeNode(value = "avatar"),
-                                }
-                        )
-                }
-        )
+//        @NamedEntityGraph(
+//                name = "message-with-user-and-conversation",
+//                attributeNodes = {
+//                        @NamedAttributeNode(value = "conversation", subgraph = "conversation-with-members"),
+//                        @NamedAttributeNode(value = "user", subgraph = "user-with-avatar"),
+//                        @NamedAttributeNode(value = "file")
+//                },
+//                subgraphs = {
+//                        @NamedSubgraph(
+//                                name = "conversation-with-members",
+//                                attributeNodes = {
+//                                        @NamedAttributeNode(value = "members"),
+//                                }
+//                        ),
+//                        @NamedSubgraph(
+//                                name = "user-with-avatar",
+//                                attributeNodes = {
+//                                        @NamedAttributeNode(value = "avatar"),
+//                                }
+//                        )
+//                }
+//        )
 
 })
 
@@ -65,11 +65,11 @@ public class MessageEntity extends GenericEntity{
     @Column (name = "content")
     String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn (name = "user_id")
     UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn (name = "conversation_id")
     ConversationEntity conversation;
 
@@ -79,6 +79,9 @@ public class MessageEntity extends GenericEntity{
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn (name = "file_id")
     FileUploadEntity file;
+
+    @Column(name = "seq")
+    long seq;
 
     @Column(name = "active")
     boolean active;

@@ -15,28 +15,28 @@ import java.util.*;
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults (level = AccessLevel.PRIVATE)
 @Entity(name = "user")
-@NamedEntityGraphs({
-        @NamedEntityGraph(
-                name = "user-with-conversations",
-                attributeNodes = {
-                        @NamedAttributeNode(
-                                value = "conversations",
-                                subgraph = "conversation-with-members"
-                        ),
-                        @NamedAttributeNode(
-                                value = "avatar"
-                        )
-                },
-                subgraphs = {
-                        @NamedSubgraph(
-                                name = "conversation-with-members",
-                                attributeNodes = {
-                                        @NamedAttributeNode(value = "members"),
-                                }
-                        )
-                }
-        )
-})
+//@NamedEntityGraphs({
+//        @NamedEntityGraph(
+//                name = "user-with-conversations",
+//                attributeNodes = {
+//                        @NamedAttributeNode(
+//                                value = "conversations",
+//                                subgraph = "conversation-with-members"
+//                        ),
+//                        @NamedAttributeNode(
+//                                value = "avatar"
+//                        )
+//                },
+//                subgraphs = {
+//                        @NamedSubgraph(
+//                                name = "conversation-with-members",
+//                                attributeNodes = {
+//                                        @NamedAttributeNode(value = "members"),
+//                                }
+//                        )
+//                }
+//        )
+//})
 @Table (name = "user")
 
 public class UserEntity extends GenericEntity implements UserDetails{
@@ -60,17 +60,13 @@ public class UserEntity extends GenericEntity implements UserDetails{
     @JoinColumn (name = "avatar_file_id")
     FileUploadEntity avatar;
 
-    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude
-    List<ConversationEntity> createdConversations = new ArrayList<>();
+//    @OneToMany(mappedBy = "createdBy", fetch = FetchType.LAZY)
+//    @EqualsAndHashCode.Exclude
+//    List<ConversationEntity> createdConversations = new ArrayList<>();
 
-    @ManyToMany (mappedBy = "members", fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude
-    Set<ConversationEntity> conversations;
-
-    @OneToMany (mappedBy = "user", fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude
-    List<MessageEntity> messages = new ArrayList<>();
+//    @OneToMany (mappedBy = "user", fetch = FetchType.LAZY)
+//    @EqualsAndHashCode.Exclude
+//    List<MessageEntity> messages = new ArrayList<>();
 
 
     @Override

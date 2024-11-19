@@ -1,6 +1,7 @@
 package com.truongphuc.service.impl;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import jakarta.mail.MessagingException;
@@ -166,9 +167,21 @@ public class AuthServiceImpl implements AuthService{
             throw new AppException("Invalid Email", ExceptionCode.INACTIVE_USER);
 
         Optional<VerifyTokenEntity> foundToken = verifyTokenRepository.findByEmail(email);
+
+
+        //Limit request email in 15 mins
+        if (foundToken.isPresent()){
+            LocalTime mailCreateTime = LocalTime.from(foundToken.get().getUpdatedAt());
+            LocalTime now = LocalTime.now();
+            if (now.getMinute() - mailCreateTime.getMinute() < 15)
+                throw new AppException("Please retry after 15 minutes", ExceptionCode.OVER_LIMIT);
+        }
+
         VerifyTokenEntity  token = foundToken.orElseGet(() -> VerifyTokenEntity.builder()
                 .email(email)
                 .build());
+
+
 
 
 
@@ -197,6 +210,12 @@ public class AuthServiceImpl implements AuthService{
         Optional<ResetPasswordTokenEntity> foundToken = resetPasswordTokenRepository.findByEmail(email);
 
         if (foundToken.isPresent()) {
+            // Limit mail request in 15 mins
+            LocalTime mailCreateTime = LocalTime.from(foundToken.get().getUpdatedAt());
+            LocalTime now = LocalTime.now();
+            if (now.getMinute() - mailCreateTime.getMinute() < 15)
+                throw new AppException("Please retry after 15 minutes", ExceptionCode.OVER_LIMIT);
+
             foundToken.get().setValue(resetToken);
             resetPasswordTokenRepository.save(foundToken.get());
         }else {
