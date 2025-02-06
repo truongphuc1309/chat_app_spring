@@ -82,7 +82,7 @@ public class ConversationUtilImpl implements ConversationUtil {
         List<ConversationDto> conversationDtoList = conversations.stream().map(conversation -> {
             Set<MemberDto> members = getMemberDtoListOfConversation(conversation);
             ConversationDto conversationDto = conversationMapper.toConversationDto(conversation);
-            conversationDto.setMembers(members);
+            if (conversationDto != null) conversationDto.setMembers(members);
 
             return conversationDto;
         }).toList();

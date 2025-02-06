@@ -1,23 +1,30 @@
 package com.truongphuc.controller;
 
+import java.io.UnsupportedEncodingException;
+
+import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
+
 import com.truongphuc.dto.request.auth.LogInRequest;
 import com.truongphuc.dto.request.auth.ResetPasswordRequest;
 import com.truongphuc.dto.request.auth.SignUpRequest;
-import com.truongphuc.dto.response.*;
+import com.truongphuc.dto.response.ApiResponse;
 import com.truongphuc.dto.response.auth.LogInResponse;
 import com.truongphuc.dto.response.auth.RefreshResponse;
 import com.truongphuc.dto.response.auth.SignUpResponse;
 import com.truongphuc.dto.response.auth.VerifyResponse;
 import com.truongphuc.service.AuthService;
-import jakarta.mail.MessagingException;
-import jakarta.validation.Valid;
+
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.UnsupportedEncodingException;
 
 @PropertySource(value = "classpath:application.properties")
 @RequiredArgsConstructor

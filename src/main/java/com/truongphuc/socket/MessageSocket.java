@@ -1,7 +1,9 @@
 package com.truongphuc.socket;
 
+import com.truongphuc.constant.ConversationAction;
 import com.truongphuc.constant.MessageAction;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
+import com.truongphuc.dto.response.conversation.ConversationSocketMessage;
 import com.truongphuc.dto.response.message.LastReadMessageResponse;
 import com.truongphuc.dto.response.message.MessageDetailsResponse;
 import com.truongphuc.dto.response.message.RealtimeMessageResponse;
@@ -23,16 +25,20 @@ public class MessageSocket {
 
      @MessageMapping ("/message")
      public void sendMessage(@Payload MessageDetailsResponse request) {
-          simpMessagingTemplate.convertAndSend("/topic/conversation/" + request.getConversation().getId(),
+          simpMessagingTemplate.convertAndSend("/topic/conversation/messages/" + request.getConversation().getId(),
                   new RealtimeMessageResponse(MessageAction.SEND, request));
 
           ConversationDetailsResponse foundConversation = conversationService.getConversationById(request.getUser().getEmail(), request.getConversation().getId());
-          foundConversation.getMembers().forEach((e) -> simpMessagingTemplate.convertAndSend("/topic/conversation/list/" + e.getId(), foundConversation));
+          ConversationSocketMessage message = ConversationSocketMessage.builder()
+                  .data(foundConversation)
+                  .action(ConversationAction.ADD)
+                  .build();
+          foundConversation.getMembers().forEach((e) -> simpMessagingTemplate.convertAndSend("/topic/conversation/list/" + e.getId(), message));
      }
 
      @MessageMapping ("/message/delete")
      public void deleteMessage(@Payload MessageDetailsResponse request) {
-          simpMessagingTemplate.convertAndSend("/topic/conversation/" + request.getConversation().getId(),
+          simpMessagingTemplate.convertAndSend("/topic/conversation/messages/" + request.getConversation().getId(),
                   new RealtimeMessageResponse(MessageAction.DELETE, request));
           simpMessagingTemplate.convertAndSend("/topic/message/last/" + request.getConversation().getId(), request);
      }

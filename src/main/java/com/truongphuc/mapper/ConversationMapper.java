@@ -5,6 +5,7 @@ import com.truongphuc.dto.request.conversation.ConversationCreationRequest;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
 import com.truongphuc.dto.response.user.UserProfileResponse;
 import com.truongphuc.entity.ConversationEntity;
+import com.truongphuc.entity.FileUploadEntity;
 import com.truongphuc.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,7 +21,7 @@ public interface ConversationMapper {
 
     @Mapping(target = "avatar", source = "avatar.url")
     @Mapping(target = "createdBy.avatar", source = "createdBy.avatar.url")
-    ConversationDetailsResponse toConversationResponse(ConversationEntity conversationEntity) ;
+    ConversationDetailsResponse toConversationResponse(ConversationEntity conversationEntity);
 
     @Mapping(target = "avatar", source = "avatar.url")
     @Mapping(target = "createdBy.avatar", source = "createdBy.avatar.url")
@@ -55,4 +56,5 @@ public interface ConversationMapper {
 
         return conversationDetailsResponse;
     }
+
 }

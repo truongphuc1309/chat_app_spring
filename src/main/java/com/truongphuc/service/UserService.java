@@ -1,6 +1,6 @@
 package com.truongphuc.service;
 
-import com.truongphuc.dto.request.auth.ChangePasswordRequest;
+import com.truongphuc.dto.request.conversation.ChangePasswordRequest;
 import com.truongphuc.dto.request.user.UserUpdateRequest;
 import com.truongphuc.dto.response.user.UserProfileResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;

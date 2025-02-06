@@ -1,7 +1,7 @@
 package com.truongphuc.service.impl;
 
 import com.truongphuc.constant.ExceptionCode;
-import com.truongphuc.dto.request.auth.ChangePasswordRequest;
+import com.truongphuc.dto.request.conversation.ChangePasswordRequest;
 import com.truongphuc.dto.request.user.UserUpdateRequest;
 import com.truongphuc.dto.response.user.UserProfileResponse;
 import com.truongphuc.entity.FileUploadEntity;

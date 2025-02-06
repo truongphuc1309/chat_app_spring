@@ -3,10 +3,7 @@ package com.truongphuc.dto.response.conversation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.truongphuc.dto.MemberDto;
 import com.truongphuc.dto.response.user.UserProfileResponse;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
@@ -15,6 +12,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Data
 public class ConversationDetailsResponse implements Serializable {

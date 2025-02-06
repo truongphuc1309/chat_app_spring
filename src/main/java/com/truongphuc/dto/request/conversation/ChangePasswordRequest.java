@@ -1,4 +1,4 @@
-package com.truongphuc.dto.request.auth;
+package com.truongphuc.dto.request.conversation;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

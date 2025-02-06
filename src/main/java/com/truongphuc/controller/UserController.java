@@ -1,6 +1,6 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.auth.ChangePasswordRequest;
+import com.truongphuc.dto.request.conversation.ChangePasswordRequest;
 import com.truongphuc.dto.request.user.UserStatusRequest;
 import com.truongphuc.dto.request.user.UserUpdateRequest;
 import com.truongphuc.dto.response.ApiResponse;
@@ -14,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor

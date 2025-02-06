@@ -1,12 +1,20 @@
 package com.truongphuc.service.impl;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import com.truongphuc.constant.ExceptionCode;
 import com.truongphuc.dto.ConversationDto;
 import com.truongphuc.dto.MemberDto;
-import com.truongphuc.dto.request.conversation.*;
+import com.truongphuc.dto.request.conversation.AddMemberToConversationRequest;
+import com.truongphuc.dto.request.conversation.ConversationAvatarChangeRequest;
+import com.truongphuc.dto.request.conversation.ConversationCreationRequest;
+import com.truongphuc.dto.request.conversation.RemoveFromConversationRequest;
+import com.truongphuc.dto.request.conversation.RenameConversationRequest;
+import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
-import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import com.truongphuc.entity.ConversationEntity;
 import com.truongphuc.entity.FileUploadEntity;
@@ -14,27 +22,22 @@ import com.truongphuc.entity.ParticipantEntity;
 import com.truongphuc.entity.UserEntity;
 import com.truongphuc.exception.AppException;
 import com.truongphuc.mapper.ConversationMapper;
-import com.truongphuc.mapper.UserMapper;
 import com.truongphuc.repository.ConversationRepository;
 import com.truongphuc.repository.ParticipantRepository;
 import com.truongphuc.repository.UserRepository;
 import com.truongphuc.service.ConversationService;
 import com.truongphuc.service.FileUploadService;
 import com.truongphuc.util.ConversationUtil;
-import com.truongphuc.util.impl.ConversationUtilImpl;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,13 +45,11 @@ import java.util.Set;
 @Service
 public class ConversationServiceImpl implements ConversationService {
     UserRepository userRepository;
-    UserMapper userMapper;
     ConversationRepository conversationRepository;
     ConversationMapper conversationMapper;
     ConversationUtil conversationUtil;
     FileUploadService fileUploadService;
     ParticipantRepository participantRepository;
-    private final ConversationUtilImpl conversationUtilImpl;
 
     @Override
     public ConversationDetailsResponse createConversation(String userEmail, ConversationCreationRequest conversationCreationRequest) {
@@ -104,6 +105,7 @@ public class ConversationServiceImpl implements ConversationService {
         });
 
         ConversationDetailsResponse response = conversationMapper.toConversationResponse(createdConversation);
+        response.setGroup(createdConversation.isGroup());
         Set<MemberDto> memberDtoSet = conversationUtil.getMemberDtoListOfConversation(createdConversation);
         response.setMembers(memberDtoSet);
 
@@ -126,6 +128,7 @@ public class ConversationServiceImpl implements ConversationService {
         ConversationDetailsResponse response = conversationMapper.toConversationResponse(foundConversation.get());
         Set<MemberDto> memberDtoSet = conversationUtil.getMemberDtoListOfConversation(foundConversation.get());
 
+        response.setGroup(foundConversation.get().isGroup());
         response.setMembers(memberDtoSet);
 
         return response;
@@ -144,7 +147,10 @@ public class ConversationServiceImpl implements ConversationService {
         if (foundConversation.isEmpty())
             throw new AppException("Invalid conversation", ExceptionCode.NON_EXISTED_CONVERSATION);
 
-        return conversationMapper.toConversationResponse(foundConversation.get());
+        var response = conversationMapper.toConversationResponse(foundConversation.get());
+        response.setGroup(foundConversation.get().isGroup());
+
+        return response;
     }
 
     @Override
@@ -207,6 +213,7 @@ public class ConversationServiceImpl implements ConversationService {
 
         ConversationDetailsResponse response =  conversationMapper.toConversationResponse(result);
         response.setMembers(memberDtoSet);
+        response.setGroup(foundConversation.get().isGroup());
 
         return response;
     }

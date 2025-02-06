@@ -1,13 +1,16 @@
 package com.truongphuc.service;
 
-import com.truongphuc.dto.request.conversation.*;
+import com.truongphuc.dto.request.conversation.AddMemberToConversationRequest;
+import com.truongphuc.dto.request.conversation.ConversationAvatarChangeRequest;
+import com.truongphuc.dto.request.conversation.ConversationCreationRequest;
+import com.truongphuc.dto.request.conversation.RemoveFromConversationRequest;
+import com.truongphuc.dto.request.conversation.RenameConversationRequest;
+import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
-import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.conversation.RenameConversationResponse;
-import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import org.springframework.stereotype.Service;
 
 @Service
 public interface ConversationService {
