@@ -1,21 +1,35 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.conversation.*;
-import com.truongphuc.dto.response.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
+import com.truongphuc.dto.request.conversation.AddMemberToConversationRequest;
+import com.truongphuc.dto.request.conversation.ConversationAvatarChangeRequest;
+import com.truongphuc.dto.request.conversation.ConversationCreationRequest;
+import com.truongphuc.dto.request.conversation.RemoveFromConversationRequest;
+import com.truongphuc.dto.request.conversation.RenameConversationRequest;
+import com.truongphuc.dto.response.ApiResponse;
+import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.conversation.ConversationAvatarChangeResponse;
 import com.truongphuc.dto.response.conversation.ConversationDetailsResponse;
 import com.truongphuc.dto.response.conversation.RenameConversationResponse;
 import com.truongphuc.service.ConversationService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RequiredArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)

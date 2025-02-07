@@ -1,13 +1,12 @@
 package com.truongphuc.service;
 
+import java.io.IOException;
+
 import com.truongphuc.dto.request.message.MessageRequest;
-import com.truongphuc.dto.request.message.ReadLastMessageRequest;
+import com.truongphuc.dto.response.PageResponse;
 import com.truongphuc.dto.response.message.LastReadMessageResponse;
 import com.truongphuc.dto.response.message.MessageDetailsResponse;
 import com.truongphuc.dto.response.message.MessageResponse;
-import com.truongphuc.dto.response.PageResponse;
-
-import java.io.IOException;
 
 public interface MessageService {
     MessageDetailsResponse sendMessage(String userEmail, MessageRequest messageRequest) throws IOException;

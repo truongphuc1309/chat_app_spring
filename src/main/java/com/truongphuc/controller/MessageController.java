@@ -1,23 +1,30 @@
 package com.truongphuc.controller;
 
-import com.truongphuc.dto.request.message.MessageRequest;
-import com.truongphuc.dto.request.message.ReadLastMessageRequest;
-import com.truongphuc.dto.response.ApiResponse;
-import com.truongphuc.dto.response.message.LastReadMessageResponse;
-import com.truongphuc.dto.response.message.MessageDetailsResponse;
-import com.truongphuc.dto.response.message.MessageResponse;
-import com.truongphuc.dto.response.PageResponse;
-import com.truongphuc.service.MessageService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+
+import com.truongphuc.dto.request.message.MessageRequest;
+import com.truongphuc.dto.response.ApiResponse;
+import com.truongphuc.dto.response.PageResponse;
+import com.truongphuc.dto.response.message.LastReadMessageResponse;
+import com.truongphuc.dto.response.message.MessageDetailsResponse;
+import com.truongphuc.dto.response.message.MessageResponse;
+import com.truongphuc.service.MessageService;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RequiredArgsConstructor
 @FieldDefaults (level = AccessLevel.PRIVATE, makeFinal = true)
