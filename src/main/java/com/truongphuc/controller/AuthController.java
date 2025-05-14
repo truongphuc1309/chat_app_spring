@@ -36,14 +36,14 @@ public class AuthController {
     final AuthService authService;
 
     @PostMapping ("/signup")
-    private ApiResponse<SignUpResponse> signUp (@RequestBody @Valid SignUpRequest signUpRequest) throws MessagingException, UnsupportedEncodingException {
+    ApiResponse<SignUpResponse> signUp(@RequestBody @Valid SignUpRequest signUpRequest) throws MessagingException, UnsupportedEncodingException {
         SignUpResponse result = authService.signUp(signUpRequest);
 
         return new ApiResponse<>("0000", "Success Sign Up", result);
     }
 
     @PostMapping ("/login")
-    private ApiResponse<LogInResponse> logIn (@RequestBody @Valid LogInRequest logInRequest) {
+    ApiResponse<LogInResponse> logIn(@RequestBody @Valid LogInRequest logInRequest) {
         LogInResponse result = authService.logIn(logInRequest);
 
         return new ApiResponse<>("0000", "Success Log In", result);
@@ -97,7 +97,7 @@ public class AuthController {
 
 
     @PostMapping("/logout")
-    private ApiResponse<String> logout (@RequestHeader("x-param") String accessToken) {
+    ApiResponse<String> logout(@RequestHeader("x-param") String accessToken) {
         authService.logOut(accessToken);
         return new ApiResponse<>("0000", "Success", "Success Log Out");
     }
