@@ -24,6 +24,8 @@ public class AppInitializer implements WebApplicationInitializer {
         ctx.register(WebSocketConfig.class);
         ctx.register(MailConfig.class);
         ctx.register(ThymeleafConfig.class);
+        ctx.register(RedisConfig.class);
+
         servletContext.addListener(new ContextLoaderListener(ctx));
         // using servlet 3 api to dynamically create
         // spring dispatcher servlet

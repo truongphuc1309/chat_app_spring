@@ -15,28 +15,6 @@ import java.util.*;
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults (level = AccessLevel.PRIVATE)
 @Entity(name = "user")
-//@NamedEntityGraphs({
-//        @NamedEntityGraph(
-//                name = "user-with-conversations",
-//                attributeNodes = {
-//                        @NamedAttributeNode(
-//                                value = "conversations",
-//                                subgraph = "conversation-with-members"
-//                        ),
-//                        @NamedAttributeNode(
-//                                value = "avatar"
-//                        )
-//                },
-//                subgraphs = {
-//                        @NamedSubgraph(
-//                                name = "conversation-with-members",
-//                                attributeNodes = {
-//                                        @NamedAttributeNode(value = "members"),
-//                                }
-//                        )
-//                }
-//        )
-//})
 @Table (name = "user")
 
 public class UserEntity extends GenericEntity implements UserDetails{

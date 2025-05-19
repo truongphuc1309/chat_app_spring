@@ -62,9 +62,11 @@ class AuthControllerTest {
     @Test
     void testLogOut_Success() throws Exception {
         String accessToken = "abcdefghijklmnopqrst";
+        String refreshToken = "abcdefghijklmnopqrst";
 
         mockMvc.perform(MockMvcRequestBuilders.post("/auth/logout")
                         .header("x-param", accessToken)
+                        .header("y-param", refreshToken)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value("0000"));
     }

@@ -17,9 +17,9 @@ public interface AuthService {
 
     LogInResponse logIn (LogInRequest logInRequest);
 
-    RefreshResponse refresh (String refreshToken);
+    RefreshResponse refresh (String accessToken, String refreshToken);
 
-    void logOut (String accessToken);
+    void logOut (String accessToken, String refreshToken);
 
     VerifyResponse verifyEmail(String verifyToken);
 

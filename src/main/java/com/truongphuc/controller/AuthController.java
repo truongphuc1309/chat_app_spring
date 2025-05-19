@@ -86,20 +86,17 @@ public class AuthController {
         return new ApiResponse<>("0000", "Success reset password", result);
     }
 
-
     @PostMapping("/refresh")
-    private ApiResponse<RefreshResponse> refresh (@RequestHeader("Referer") String refreshToken) {
+    private ApiResponse<RefreshResponse> refresh (@RequestHeader("Referer") String refreshToken, @RequestHeader("Changer") String accessToken) {
 
-        RefreshResponse result = authService.refresh(refreshToken);
+        RefreshResponse result = authService.refresh(accessToken, refreshToken);
 
         return new ApiResponse<>("0000", "Success Refresh", result);
     }
 
-
     @PostMapping("/logout")
-    ApiResponse<String> logout(@RequestHeader("x-param") String accessToken) {
-        authService.logOut(accessToken);
+    ApiResponse<String> logout(@RequestHeader("x-param") String accessToken, @RequestHeader("y-param") String refreshToken) {
+        authService.logOut(accessToken, refreshToken);
         return new ApiResponse<>("0000", "Success", "Success Log Out");
     }
-    
 }
