@@ -1,6 +1,0 @@
-- handle refresh token (F)
-- handle change feature Realtime (creat, del chat)(F)
-- add name sender in conversation(f)
-
-
-- schedule for db(db)

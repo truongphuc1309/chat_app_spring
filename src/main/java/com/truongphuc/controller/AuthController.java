@@ -15,12 +15,9 @@ import com.truongphuc.dto.response.auth.SignUpResponse;
 import com.truongphuc.dto.response.auth.VerifyResponse;
 import com.truongphuc.service.AuthService;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +29,9 @@ import lombok.experimental.FieldDefaults;
 @RestController
 @RequestMapping ("/auth")
 public class AuthController {
+
+    @Value("${test}")
+    String test;
 
     final AuthService authService;
 

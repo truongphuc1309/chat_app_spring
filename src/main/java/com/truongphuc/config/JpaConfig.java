@@ -1,16 +1,9 @@
 package com.truongphuc.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import com.cosium.spring.data.jpa.entity.graph.repository.support.EntityGraphJpaRepositoryFactoryBean;
 import jakarta.persistence.EntityManagerFactory;
-
-import javax.sql.DataSource;
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +17,9 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
+import java.util.Properties;
+
 @Slf4j
 @Configuration
 @PropertySource(value = "classpath:application.properties")
@@ -33,7 +29,29 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         repositoryFactoryBeanClass = EntityGraphJpaRepositoryFactoryBean.class
 )
 @EnableTransactionManagement
-public class JpaConfig implements BeanPostProcessor {
+public class JpaConfig {
+
+    @Value("${db.driver}")
+    private String driver;
+
+    @Value("${db.url}")
+    private String url;
+
+    @Value("${db.username}")
+    private String userName;
+
+    @Value("${db.password}")
+    private String password;
+
+    @Value("${db.hibernate.hbm2ddl.auto}")
+    private String hbm2ddlAuto;
+
+    @Value("${db.hibernate.show_sql}")
+    private String showSql;
+
+    @Value("${db.hibernate.dialect}")
+    private String dialect;
+
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
@@ -55,43 +73,27 @@ public class JpaConfig implements BeanPostProcessor {
     }
 
     @Bean
-    public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
+    public  static PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
         return new PersistenceExceptionTranslationPostProcessor();
     }
 
     @Bean
     public DataSource dataSource() {
-
-        Properties properties = new Properties();
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("application.properties");
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
-        try {
-            properties.load(inputStream);
-
-            String driver = properties.getProperty("db.driver");
-            String url = properties.getProperty("db.url");
-            String userName = properties.getProperty("db.username");
-            String password = properties.getProperty("db.password");
-
-            dataSource.setDriverClassName(driver);
-            dataSource.setUrl(url);
-            dataSource.setUsername(userName);
-            dataSource.setPassword(password);
-        } catch (IOException e) {
-            log.error("ERROR LOADING DATABASE PROPERTIES", e);
-        }
+        dataSource.setDriverClassName(driver);
+        dataSource.setUrl(url);
+        dataSource.setUsername(userName);
+        dataSource.setPassword(password);
 
         return dataSource;
     }
 
     private Properties additionalProperties() {
         Properties properties = new Properties();
-//        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
-
-        properties.setProperty("hibernate.hbm2ddl.auto", "update");
-//        properties.setProperty("hibernate.show_sql", "true");
+        properties.setProperty("hibernate.dialect", dialect);
+        properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlAuto);
+        properties.setProperty("hibernate.show_sql", showSql);
 
         return properties;
     }

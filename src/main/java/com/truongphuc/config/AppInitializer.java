@@ -13,6 +13,9 @@ public class AppInitializer implements WebApplicationInitializer {
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
+        // Load .env
+        DotenvInitializer.initialize();
+
         System.out.println("\n\n======================== Starting Web Application ==================");
         AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
         // register our config class
