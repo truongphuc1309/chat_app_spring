@@ -20,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
+
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
@@ -63,7 +65,7 @@ public class WebSocketInterceptor implements ChannelInterceptor {
 
         // To set user status to offline when ws disconnect
         if (accessor != null && StompCommand.DISCONNECT.equals(accessor.getCommand())){
-            String email = accessor.getUser().getName();
+            String email = Objects.requireNonNull(accessor.getUser()).getName();
             webSocketService.sendUpdateUserStatus(email, false);
             log.info("Disconnected to websocket {}", email);
         }

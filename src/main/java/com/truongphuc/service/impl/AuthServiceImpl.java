@@ -1,7 +1,6 @@
 package com.truongphuc.service.impl;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalTime;
 import java.util.Date;
 import java.util.Optional;
 
@@ -43,8 +42,6 @@ public class AuthServiceImpl implements AuthService{
     AuthMapper authMapper;
     AuthenticationManager authenticationManager;
     PasswordEncoder passwordEncoder;
-    VerifyTokenRepository verifyTokenRepository;
-    ResetPasswordTokenRepository resetPasswordTokenRepository;
     UserService userService;
     JwtService jwtService;
     MailService mailService;
@@ -67,7 +64,7 @@ public class AuthServiceImpl implements AuthService{
         // Generate verify key and send email
         String verifyToken = jwtService.generateVerifyToken(userEntity);
         String tokenKey = redisService.createKey(TokenType.VERIFY_TOKEN, persistedUser.getId());
-        Date expiration = jwtService.extractExpiration(TokenType.VERIFY_TOKEN, tokenKey);
+        Date expiration = jwtService.extractExpiration(TokenType.VERIFY_TOKEN, verifyToken);
         redisService.createKeyValuePair(tokenKey, verifyToken, expiration);
 
         mailService.sendVerificationEmail(userEntity.getEmail(), verifyToken);
@@ -107,8 +104,12 @@ public class AuthServiceImpl implements AuthService{
         if (foundToken.isEmpty())
             throw new AppException("Token not found", ExceptionCode.INVALID_TOKEN);
 
-        Date oldAccessTokenExpiration = jwtService.extractExpiration(TokenType.ACCESS_TOKEN, accessToken);
-        redisService.addTokenToBlacklist(TokenType.ACCESS_TOKEN, accessToken, oldAccessTokenExpiration);
+        try {
+            Date oldAccessTokenExpiration = jwtService.extractExpiration(TokenType.ACCESS_TOKEN, accessToken);
+            redisService.addTokenToBlacklist(TokenType.ACCESS_TOKEN, accessToken, oldAccessTokenExpiration);
+        } catch (Exception ignored){
+        }
+
 
         String newAccessToken = jwtService.generateAccessToken(foundUser);
 
@@ -163,7 +164,6 @@ public class AuthServiceImpl implements AuthService{
         if (foundUser.isEmpty() || foundUser.get().isActive())
             throw new AppException("Invalid Email", ExceptionCode.INACTIVE_USER);
 
-//        Optional<VerifyTokenEntity> foundToken = verifyTokenRepository.findByEmail(email);
         String tokenKey = redisService.createKey(TokenType.VERIFY_TOKEN, foundUser.get().getId());
         if (redisService.findValueByKey(tokenKey) != null)
             redisService.deleteKey(tokenKey);
@@ -176,16 +176,11 @@ public class AuthServiceImpl implements AuthService{
 //                throw new AppException("Please retry after 15 minutes", ExceptionCode.OVER_LIMIT);
 //        }
 
-//        VerifyTokenEntity  token = foundToken.orElseGet(() -> VerifyTokenEntity.builder()
-//                .email(email)
-//                .build());
 
 
         String verifyToken = jwtService.generateVerifyToken(foundUser.get());
         Date expiration = jwtService.extractExpiration(TokenType.VERIFY_TOKEN, verifyToken);
         redisService.createKeyValuePair(tokenKey, verifyToken, expiration);
-//        token.setValue(verifyToken);
-//        verifyTokenRepository.save(token);
 
         //Send email
         mailService.sendVerificationEmail(email, verifyToken);

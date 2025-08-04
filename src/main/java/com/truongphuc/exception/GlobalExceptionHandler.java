@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
+
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -31,7 +33,7 @@ public class GlobalExceptionHandler {
 
         ExceptionCode exceptionCode = ExceptionCode.INVALID_ARGUMENT;
         res.setCode(exceptionCode.getCode());
-        res.setMessage(exception.getFieldError().getDefaultMessage());
+        res.setMessage(Objects.requireNonNull(exception.getFieldError()).getDefaultMessage());
 
         return new ResponseEntity<>(res, exceptionCode.getHttpCode());
     }

@@ -29,10 +29,6 @@ import lombok.experimental.FieldDefaults;
 @RestController
 @RequestMapping ("/auth")
 public class AuthController {
-
-    @Value("${test}")
-    String test;
-
     final AuthService authService;
 
     @PostMapping ("/signup")
@@ -87,7 +83,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    private ApiResponse<RefreshResponse> refresh (@RequestHeader("Referer") String refreshToken, @RequestHeader("Changer") String accessToken) {
+    private ApiResponse<RefreshResponse> refresh (@RequestHeader("Refresher") String refreshToken, @RequestHeader("Changer") String accessToken) {
 
         RefreshResponse result = authService.refresh(accessToken, refreshToken);
 
